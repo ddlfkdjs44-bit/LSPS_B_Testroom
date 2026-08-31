@@ -783,8 +783,16 @@
 #supply-view .req-link { font-size:12px; color:var(--sp-ink-soft); margin-top:3px; display:block; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 #supply-view .req-meta { font-size:12px; color:var(--sp-ink-soft); margin-top:2px; font-family:'Malgun Gothic','맑은 고딕',sans-serif; }
 #supply-view .trash-btn { border:none; background:transparent; color:var(--sp-ink-soft); cursor:pointer; padding:6px; flex-shrink:0; font-size:15px; }
+#supply-view .prio-badge { font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:999px; flex-shrink:0; }
+#supply-view .prio-badge.urgent { background:#fde3df; color:#c0392b; }
+#supply-view .prio-badge.low { background:#eef0f2; color:var(--sp-ink-soft); }
+#supply-view .req-actions { display:flex; flex-direction:column; gap:4px; align-items:flex-end; flex-shrink:0; }
+#supply-view .move-next-btn { border:1px solid var(--sp-line); background:#fff; color:var(--sp-ink-soft); cursor:pointer; padding:4px 9px; border-radius:6px; font-size:11px; white-space:nowrap; }
+#supply-view .move-next-btn:hover { border-color:var(--sp-amber); color:var(--sp-amber-dark); }
+#supply-view .move-next-btn.icon-only { padding:4px 7px; font-size:12px; }
+#supply-view .row-actions { display:flex; gap:4px; align-items:center; justify-content:center; }
 #supply-view .trash-btn:hover { opacity:.7; }
-#supply-view table.supply-table { width:100%; border-collapse:collapse; font-size:13px; min-width:780px; }
+#supply-view table.supply-table { width:100%; border-collapse:collapse; font-size:13px; min-width:1020px; table-layout:fixed; }
 #supply-view .table-scroll { overflow-x:auto; }
 #supply-view .supply-table thead tr { background:var(--sp-bg); color:var(--sp-ink-soft); }
 #supply-view .supply-table th { padding:10px 12px; font-size:11px; font-weight:500; text-align:center; }
@@ -799,7 +807,10 @@
 #supply-view .prod-thumb-empty { width:36px; height:36px; border-radius:8px; background:var(--sp-bg); border:1px solid var(--sp-line); flex-shrink:0; }
 #supply-view .prod-name { font-weight:600; font-size:13px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 #supply-view .prod-link { font-size:11px; color:var(--sp-ink-soft); display:block; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px; }
-#supply-view .cell-input { width:100%; border:1px solid var(--sp-line); border-radius:6px; padding:5px 7px; font-size:13px; font-family:'Malgun Gothic','맑은 고딕',sans-serif; text-align:center; }
+#supply-view .cell-input { width:100%; border:1px solid var(--sp-line); border-radius:6px; padding:5px 4px; font-size:13px; font-family:'Malgun Gothic','맑은 고딕',sans-serif; text-align:center; box-sizing:border-box; }
+#supply-view input[type=number]::-webkit-outer-spin-button,
+#supply-view input[type=number]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+#supply-view input[type=number] { -moz-appearance:textfield; appearance:textfield; }
 #supply-view .cell-input.price { text-align:right; }
 #supply-view .cell-input.note-field { text-align:left; }
 #supply-view .supply-table tfoot td { border-top:2px solid var(--sp-ink); background:var(--sp-bg); font-weight:700; }
@@ -898,8 +909,8 @@
 const KEY='work-schedule-v1';
 
 /* ════════════════ Supabase 연동 (팀 공유) ════════════════ */
-const SUPABASE_URL='https://gitpmhmdrvrjwufeiwcb.supabase.co';       // ← SUPABASE_SETUP.md 참고해 교체
-const SUPABASE_ANON_KEY='sb_publishable_9vWgYrVC4iSQRx-qPKwQyg_DpfZ31Pk';                   // ← SUPABASE_SETUP.md 참고해 교체
+const SUPABASE_URL='https://gitpmhmdrvrjwufeiwcb.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_9vWgYrVC4iSQRx-qPKwQyg_DpfZ31Pk';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
 let session=null, profile=null, profilesMap={}, pendingSignups=[];
 let memoState={memo:'',dateMemos:{},memoAutoNum:false};
@@ -2892,7 +2903,7 @@ function supplyCurrentYM(){const d=new Date();return d.getFullYear()+'-'+supplyP
 function supplyYmLabel(ym){const p=ym.split('-');return p[0]+'년 '+parseInt(p[1],10)+'월';}
 function supplyShiftYM(ym,delta){const p=ym.split('-').map(Number);const d=new Date(p[0],p[1]-1+delta,1);return d.getFullYear()+'-'+supplyPad(d.getMonth()+1);}
 function supplyWon(n){return '₩'+(Number(n)||0).toLocaleString('ko-KR');}
-function supplyRowToItem(r){return {id:r.id,name:r.name,link:r.link||'',photo:r.photo||'',qty:r.qty,unitPrice:r.unit_price,note:r.note||'',requester:r.requester,requesterId:r.requester_id,createdAt:r.created_at};}
+function supplyRowToItem(r){return {id:r.id,name:r.name,link:r.link||'',photo:r.photo||'',qty:r.qty,unitPrice:r.unit_price,note:r.note||'',requester:r.requester,requesterId:r.requester_id,createdAt:r.created_at,priority:r.priority||'보통'};}
 async function supplyFetchItems(ym){
   const {data:rows,error}=await sb.from('supply_items').select('*').eq('ym',ym).order('created_at',{ascending:true});
   if(error){console.error(error);return [];}
@@ -2901,7 +2912,7 @@ async function supplyFetchItems(ym){
 async function supplyLoadState(){ supplyState.items=await supplyFetchItems(supplyState.ym); }
 async function supplyInsertItem(item){
   lastSelfSupplyChangeAt=Date.now();
-  const {error}=await sb.from('supply_items').insert({ym:supplyState.ym,name:item.name,link:item.link,photo:item.photo,qty:item.qty,unit_price:item.unitPrice,note:item.note,requester:item.requester,requester_id:profile.id});
+  const {error}=await sb.from('supply_items').insert({ym:supplyState.ym,name:item.name,link:item.link,photo:item.photo,qty:item.qty,unit_price:item.unitPrice,note:item.note,requester:item.requester,requester_id:profile.id,priority:item.priority||'보통'});
   return !error;
 }
 async function supplyUpdateItemField(id,field,value){
@@ -2912,6 +2923,14 @@ async function supplyUpdateItemField(id,field,value){
 }
 async function supplyDeleteItem(id){lastSelfSupplyChangeAt=Date.now();await sb.from('supply_items').delete().eq('id',id);}
 async function supplyClearAllItems(){lastSelfSupplyChangeAt=Date.now();await sb.from('supply_items').delete().eq('ym',supplyState.ym);}
+async function supplyMoveItemToYm(id,newYm){
+  lastSelfSupplyChangeAt=Date.now();
+  await sb.from('supply_items').update({ym:newYm}).eq('id',id);
+}
+async function supplyUpdatePriority(id,priority){
+  lastSelfSupplyChangeAt=Date.now();
+  await sb.from('supply_items').update({priority}).eq('id',id);
+}
 function supplyShowToast(msg){
   const t=document.getElementById('sp-toast');if(!t)return;
   t.textContent=msg;t.style.display='block';
@@ -2985,7 +3004,7 @@ function renderSuppliesView(){
     html+=`<form id="sp-add-form" class="form-card" novalidate>
       <div class="form-strip"><span>REQUEST</span></div>
       <div class="form-body">
-        <div class="row"><input class="field" id="sp-f-name" placeholder="상품명 (예: A4 용지 500매)"><input class="field mono w-24" id="sp-f-qty" type="number" min="1" value="1"></div>
+        <div class="row"><input class="field" id="sp-f-name" placeholder="상품명 (예: A4 용지 500매)"><input class="field mono w-24" id="sp-f-qty" type="number" min="1" value="1"><select class="field w-24" id="sp-f-priority"><option value="보통" selected>보통</option><option value="긴급">긴급</option><option value="낮음">낮음</option></select></div>
         <div class="row"><div class="link-wrap"><span class="li-icon">🔗</span><input class="field" id="sp-f-link" placeholder="구매 링크 *"></div><div class="field w-40" style="background:var(--sp-bg);color:var(--sp-ink-soft);display:flex;align-items:center;">신청자: ${esc(profile.name)}</div></div>
         <div class="row"><input class="field mono w-40" id="sp-f-price" type="number" min="0" placeholder="단가 * (원)"><input class="field mono" id="sp-f-note" placeholder="알파몰 상품코드 (모르면 비워두세요)"></div>
         <div class="btnrow">
@@ -3027,11 +3046,12 @@ function supplyAttachShellEvents(){
       const link=document.getElementById('sp-f-link').value.trim();
       const priceRaw=document.getElementById('sp-f-price').value;
       const note=document.getElementById('sp-f-note').value.trim();
+      const priority=document.getElementById('sp-f-priority').value;
       const priceValid=String(priceRaw).trim()!==''&&Number(priceRaw)>0;
       if(!name||!link||!supplyState.photoData||!priceValid){supplyShowFormError('상품명·구매 링크·사진·단가를 입력해 주세요.');return;}
       supplyShowFormError('');
       const submitBtn=document.getElementById('sp-submit-btn');if(submitBtn)submitBtn.disabled=true;
-      const item={name,link,photo:supplyState.photoData,qty,unitPrice:Number(priceRaw)||0,note,requester:profile.name};
+      const item={name,link,photo:supplyState.photoData,qty,unitPrice:Number(priceRaw)||0,note,requester:profile.name,priority};
       const ok=await supplyInsertItem(item);
       if(!ok){supplyShowFormError('등록 중 오류가 발생했어요. 다시 시도해주세요.');if(submitBtn)submitBtn.disabled=false;return;}
       await supplyLoadState();
@@ -3056,24 +3076,43 @@ function supplyPasteHandler(e){
     }
   }
 }
+function supplyPriorityRank(p){return p==='긴급'?0:(p==='낮음'?2:1);}
+function supplySortedItems(){
+  return supplyState.items.slice().sort((a,b)=>{
+    const r=supplyPriorityRank(a.priority)-supplyPriorityRank(b.priority);
+    if(r!==0)return r;
+    return new Date(a.createdAt)-new Date(b.createdAt);
+  });
+}
+function supplyPriorityBadge(p){
+  if(p==='긴급')return '<span class="prio-badge urgent">긴급</span>';
+  if(p==='낮음')return '<span class="prio-badge low">낮음</span>';
+  return '';
+}
 function supplyRenderList(){
   const box=document.getElementById('sp-list-container');
   const t=supplyTotals();
+  const items=supplySortedItems();
   if(supplyState.view==='requester'){
     let html='<div class="list-toolbar"><span class="stat-text">총 '+supplyState.items.length+'건 · 수량 합계 '+t.qty+'개</span><button class="icon-btn" id="sp-refresh-btn">⟳</button></div><div class="panel">';
-    if(supplyState.items.length===0){
+    if(items.length===0){
       html+='<div class="empty-state">등록된 품목이 없습니다. 위 양식을 통해 첫 항목을 등록해 주세요.</div>';
     }else{
-      supplyState.items.forEach(it=>{
+      items.forEach(it=>{
         const canDel=isSupplyAdmin()||it.requesterId===profile.id;
         html+='<div class="req-card">';
         html+=`<img class="req-thumb" src="${it.photo}" data-photo-view="${it.id}" style="cursor:zoom-in">`;
         html+='<div class="req-info">';
-        html+=`<div class="req-name-row"><span class="req-name">${esc(it.name)}</span><span class="qty-badge">x${esc(it.qty)}</span></div>`;
+        html+=`<div class="req-name-row"><span class="req-name">${esc(it.name)}</span>${supplyPriorityBadge(it.priority)}<span class="qty-badge">x${esc(it.qty)}</span></div>`;
         if(it.link)html+=`<a class="req-link" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${esc(it.link)}</a>`;
         html+=`<div class="req-meta">신청자 · ${esc(it.requester)} · ${supplyWon(it.unitPrice)}${it.note?' · '+esc(it.note):''}</div>`;
         html+='</div>';
-        html+=canDel?`<button class="trash-btn" data-del="${it.id}">🗑</button>`:'';
+        if(canDel||isSupplyAdmin()){
+          html+='<div class="req-actions">';
+          if(isSupplyAdmin())html+=`<button class="move-next-btn" data-move="${it.id}" title="다음 달로 이동">▶다음달</button>`;
+          if(canDel)html+=`<button class="trash-btn" data-del="${it.id}">🗑</button>`;
+          html+='</div>';
+        }
         html+='</div>';
       });
     }
@@ -3081,11 +3120,11 @@ function supplyRenderList(){
     box.innerHTML=html;
   }else{
     let html='<div class="list-toolbar"><span class="stat-text" id="sp-admin-stat-line">총 '+supplyState.items.length+'건 · 수량 합계 '+t.qty+'개 · 총 금액 '+supplyWon(t.amount)+'</span><div class="toolbar-actions"><button class="icon-btn" id="sp-refresh-btn">⟳</button><button class="copy-btn" id="sp-copy-btn" '+(supplyState.items.length===0?'disabled':'')+'>⧉ 표 복사</button></div></div><div class="panel">';
-    if(supplyState.items.length===0){
+    if(items.length===0){
       html+='<div class="empty-state">등록된 품목이 없습니다. 신청자 화면에서 먼저 등록해 주세요.</div>';
     }else{
-      html+='<div class="table-scroll"><table class="supply-table"><thead><tr><th style="width:36px">No</th><th class="left">상품명</th><th style="width:100px">단가</th><th style="width:56px">수량</th><th style="width:100px">금액</th><th style="width:170px">비고<small>(알파몰 코드)</small></th><th style="width:104px">신청자</th><th style="width:44px"></th></tr></thead><tbody>';
-      supplyState.items.forEach((it,i)=>{
+      html+='<div class="table-scroll"><table class="supply-table"><thead><tr><th style="width:36px">No</th><th class="left">상품명</th><th style="width:88px">우선순위</th><th style="width:110px">단가</th><th style="width:68px">수량</th><th style="width:100px">금액</th><th style="width:180px">비고<small>(알파몰 코드)</small></th><th style="width:104px">신청자</th><th style="width:76px"></th></tr></thead><tbody>';
+      items.forEach((it,i)=>{
         const amount=(Number(it.unitPrice)||0)*(Number(it.qty)||0);
         html+=`<tr data-row="${it.id}"><td class="center mono">${i+1}</td><td><div class="prod-cell">`;
         html+=it.photo?`<img class="prod-thumb" src="${it.photo}" data-photo-view="${it.id}" style="cursor:zoom-in">`:'<div class="prod-thumb-empty"></div>';
@@ -3093,14 +3132,15 @@ function supplyRenderList(){
         html+=`<div class="prod-name">${esc(it.name)}</div>`;
         if(it.link)html+=`<a class="prod-link" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${esc(it.link)}</a>`;
         html+='</div></div></td>';
+        html+=`<td><select class="cell-input" data-id="${it.id}" data-field="priority"><option value="긴급" ${it.priority==='긴급'?'selected':''}>긴급</option><option value="보통" ${(!it.priority||it.priority==='보통')?'selected':''}>보통</option><option value="낮음" ${it.priority==='낮음'?'selected':''}>낮음</option></select></td>`;
         html+=`<td><input class="cell-input price" data-id="${it.id}" data-field="unitPrice" type="number" min="0" value="${esc(it.unitPrice)}"></td>`;
         html+=`<td><input class="cell-input" data-id="${it.id}" data-field="qty" type="number" min="1" value="${esc(it.qty)}"></td>`;
         html+=`<td class="right mono amount-cell">${supplyWon(amount)}</td>`;
         html+=`<td><input class="cell-input note-field" data-id="${it.id}" data-field="note" value="${esc(it.note)}" placeholder="알파몰코드"></td>`;
         html+=`<td class="center req-name-small">${esc(it.requester)}</td>`;
-        html+=`<td class="center"><button class="trash-btn" data-del="${it.id}">🗑</button></td></tr>`;
+        html+=`<td class="center row-actions"><button class="move-next-btn icon-only" data-move="${it.id}" title="다음 달로 이동">▶</button><button class="trash-btn" data-del="${it.id}">🗑</button></td></tr>`;
       });
-      html+=`</tbody><tfoot><tr><td colspan="4" class="center">총 금액</td><td class="right mono" id="sp-total-amount-cell">${supplyWon(t.amount)}</td><td colspan="3"></td></tr></tfoot></table></div>`;
+      html+=`</tbody><tfoot><tr><td colspan="5" class="center">총 금액</td><td class="right mono" id="sp-total-amount-cell">${supplyWon(t.amount)}</td><td colspan="3"></td></tr></tfoot></table></div>`;
     }
     html+='</div>';
     if(supplyState.items.length>0)html+='<div class="clear-row"><button class="clear-link" id="sp-clear-all-btn">이 달 목록 전체 삭제</button></div>';
@@ -3121,6 +3161,16 @@ function supplyAttachListEvents(){
       const id=btn.dataset.del;
       await supplyDeleteItem(id);
       supplyState.items=supplyState.items.filter(it=>it.id!==id);
+      supplyRenderList();
+    });
+  });
+  box.querySelectorAll('[data-move]').forEach(btn=>{
+    btn.addEventListener('click',async()=>{
+      const id=btn.dataset.move;
+      const nextYm=supplyShiftYM(supplyState.ym,1);
+      if(!confirm(`다음 달(${supplyYmLabel(nextYm)}) 목록으로 옮길까요?`))return;
+      await supplyMoveItemToYm(id,nextYm);
+      await supplyLoadState();
       supplyRenderList();
     });
   });
