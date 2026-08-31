@@ -686,7 +686,10 @@
 #qc-view tbody th.rowname .del:hover {color:#f0a493;}
 #qc-view tbody th.rowname input {background:transparent !important;border:none;color:var(--qc-text) !important;font-family:'IBM Plex Mono';font-size:14px;width:100%;padding:11px 0;outline:none;}
 #qc-view tbody th.rowname input:focus {color:var(--qc-accent) !important;}
-#qc-view td.qccell {min-width:58px;height:46px;text-align:center;cursor:pointer;padding:0 8px;user-select:none;background:var(--qc-panel) !important;}
+#qc-view td.qccell {min-width:64px;height:52px;text-align:center;cursor:pointer;padding:0 8px;user-select:none;background:var(--qc-panel) !important;position:relative;}
+#qc-view .note-mark {position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 11px 11px 0;border-color:transparent rgba(78,205,194,.22) transparent transparent;cursor:pointer;transition:border-color .15s;}
+#qc-view td.qccell:hover .note-mark {border-color:transparent rgba(78,205,194,.8) transparent transparent;}
+#qc-view .note-mark.has-note {border-color:transparent #f0bb52 transparent transparent !important;}
 #qc-view td.qccell.typecol {background:rgba(240,187,82,.07);}
 #qc-view td.qccell .dot {width:26px;height:26px;border-radius:6px;margin:0 auto;background:var(--qc-pending) !important;border:1px solid #5a6883;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;line-height:1;color:var(--qc-text);}
 #qc-view td.qccell:active .dot {transform:scale(.85);}
@@ -779,7 +782,7 @@
 #supply-view .qty-badge { font-size:11px; background:var(--sp-amber-soft); color:var(--sp-amber-dark); padding:2px 7px; border-radius:5px; font-family:'Malgun Gothic','맑은 고딕',sans-serif; flex-shrink:0; }
 #supply-view .req-link { font-size:12px; color:var(--sp-ink-soft); margin-top:3px; display:block; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 #supply-view .req-meta { font-size:12px; color:var(--sp-ink-soft); margin-top:2px; font-family:'Malgun Gothic','맑은 고딕',sans-serif; }
-#supply-view .trash-btn { border:none; background:transparent; color:var(--sp-ink-soft); cursor:pointer; padding:6px; flex-shrink:0; }
+#supply-view .trash-btn { border:none; background:transparent; color:var(--sp-ink-soft); cursor:pointer; padding:6px; flex-shrink:0; font-size:15px; }
 #supply-view .trash-btn:hover { opacity:.7; }
 #supply-view table.supply-table { width:100%; border-collapse:collapse; font-size:13px; min-width:780px; }
 #supply-view .table-scroll { overflow-x:auto; }
@@ -798,8 +801,9 @@
 #supply-view .prod-link { font-size:11px; color:var(--sp-ink-soft); display:block; text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:220px; }
 #supply-view .cell-input { width:100%; border:1px solid var(--sp-line); border-radius:6px; padding:5px 7px; font-size:13px; font-family:'Malgun Gothic','맑은 고딕',sans-serif; text-align:center; }
 #supply-view .cell-input.price { text-align:right; }
+#supply-view .cell-input.note-field { text-align:left; }
 #supply-view .supply-table tfoot td { border-top:2px solid var(--sp-ink); background:var(--sp-bg); font-weight:700; }
-#supply-view .req-name-small { font-size:11px; color:var(--sp-ink-soft); }
+#supply-view .req-name-small { font-size:11.5px; color:var(--sp-ink-soft); white-space:nowrap; }
 #supply-view .clear-row { display:flex; justify-content:flex-end; margin-top:12px; }
 #supply-view .clear-link { font-size:12px; color:var(--sp-brick); background:none; border:none; cursor:pointer; text-decoration:underline; font-family:inherit; }
 #supply-view #sp-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:var(--sp-ink); color:#fff; padding:9px 16px; border-radius:999px; font-size:12px; box-shadow:0 8px 24px rgba(0,0,0,.15); display:none; z-index:50; }
@@ -883,6 +887,7 @@
 <div class="scrim" id="lr-scrim"><div class="modal" id="lr-modal"></div></div>
 <div class="scrim" id="leavebell-scrim"><div class="modal" id="leavebell-modal"></div></div>
 <div class="scrim" id="signupbell-scrim"><div class="modal" id="signupbell-modal"></div></div>
+<div class="scrim" id="qcnote-scrim"><div class="modal" id="qcnote-modal"></div></div>
 
 <div class="scrim show" id="auth-scrim" style="z-index:9999;">
   <div class="modal" id="auth-modal" style="max-width:360px;"></div>
@@ -2378,7 +2383,7 @@ function qcNewUnit(cap, no){
 }
 function qcApplyPayload(payload){
   qcColumns=(payload&&payload.columns)||qcDefaultColumns();
-  qcUnits=((payload&&payload.units)||[]).map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:u.capacity||'',tests:u.tests||[]}));
+  qcUnits=((payload&&payload.units)||[]).map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:u.capacity||'',tests:u.tests||[],notes:u.notes||{}}));
   qcProject=(payload&&payload.project)||{name:''};
 }
 async function qcLoadData(){
@@ -2442,6 +2447,43 @@ function qcRenderProjectSelect(){
   if(!sel)return;
   sel.innerHTML=qcProjects.map(p=>`<option value="${p.id}" ${p.id===qcActiveId?'selected':''}>${esc(p.name||'(이름 없음)')}</option>`).join('');
 }
+
+/* ── 칸별 메모(비고) ── */
+let qcNoteTarget=null;
+function qcOpenNote(unitId,colId){
+  qcNoteTarget={unitId,colId};
+  const u=qcUnits.find(x=>x.id===unitId);
+  const col=qcColumns.find(x=>x.id===colId);
+  const val=(u&&u.notes&&u.notes[colId])||'';
+  document.getElementById('qcnote-modal').innerHTML=`
+    <div class="m-head"><div class="m-date">${esc(u?u.no:'')}호기 · ${esc(col?col.name:'')} 메모</div></div>
+    <div class="m-body"><textarea id="qcnote-text" class="m-memo" placeholder="시험 중 특이사항, 재확인할 내용 등을 적어줘" style="width:100%;min-height:130px;">${esc(val)}</textarea></div>
+    <div class="m-foot"><div class="left">${val?'<button class="ghost" onclick="qcDeleteNote()">메모 삭제</button>':''}</div><button class="done-btn" onclick="qcSaveNote()">저장</button></div>`;
+  document.getElementById('qcnote-scrim').classList.add('show');
+}
+function qcCloseNote(){document.getElementById('qcnote-scrim').classList.remove('show');qcNoteTarget=null;}
+async function qcSaveNote(){
+  if(!qcNoteTarget)return;
+  const {unitId,colId}=qcNoteTarget;
+  const u=qcUnits.find(x=>x.id===unitId);
+  if(!u)return;
+  if(!u.notes)u.notes={};
+  const text=document.getElementById('qcnote-text').value.trim();
+  if(text)u.notes[colId]=text; else delete u.notes[colId];
+  await qcSave();
+  qcCloseNote();
+  qcRender();
+}
+async function qcDeleteNote(){
+  if(!qcNoteTarget)return;
+  const {unitId,colId}=qcNoteTarget;
+  const u=qcUnits.find(x=>x.id===unitId);
+  if(u&&u.notes)delete u.notes[colId];
+  await qcSave();
+  qcCloseNote();
+  qcRender();
+}
+document.getElementById('qcnote-scrim').addEventListener('click',ev=>{if(ev.target.id==='qcnote-scrim')qcCloseNote();});
 async function qcLoadArchive(){
   const {data:rows}=await sb.from('qc_tracker_archive').select('*').order('saved_at',{ascending:false});
   return (rows||[]).map(r=>({id:r.id,savedAt:r.saved_at,name:r.name,columns:(r.payload&&r.payload.columns)||[],units:(r.payload&&r.payload.units)||[]}));
@@ -2557,7 +2599,9 @@ function qcRender(){
         let cls='',mark='',dotStyle='background:#414f68 !important;border-color:#5a6883 !important;color:#f2f4f8 !important;';
         if(own===1){cls='done';dotStyle='background:#43d68a !important;border-color:#43d68a !important;color:#0e2417 !important;';}
         else if(qcIsEffDone(u,c.idx)){cls='exempt';mark='×';dotStyle='background:transparent !important;border:1px dashed #f0bb52 !important;color:#f0bb52 !important;';}
-        return `<td class="qccell ${cls} ${c.category==='type'?'typecol':''}" data-uid="${u.id}" data-ci="${c.idx}"><div class="dot" style="${dotStyle}">${mark}</div></td>`;
+        const hasNote=!!(u.notes&&u.notes[c.id]&&u.notes[c.id].trim());
+        const noteMark=`<span class="note-mark ${hasNote?'has-note':''}" data-uid="${u.id}" data-cid="${c.id}" title="${hasNote?'메모 있음 — 클릭해서 보기':'클릭해서 메모 추가'}"></span>`;
+        return `<td class="qccell ${cls} ${c.category==='type'?'typecol':''}" data-uid="${u.id}" data-ci="${c.idx}"><div class="dot" style="${dotStyle}">${mark}</div>${noteMark}</td>`;
       }).join('');
       return `<tr class="${complete?'complete':''}">
         <th class="rowno"><input type="text" value="${esc(u.no)}" data-uid="${u.id}" class="qcNoInput" style="background:transparent !important;color:#f2f4f8 !important;"></th>
@@ -2599,6 +2643,12 @@ function qcUpdateStats(){
   document.getElementById('qcRingFg').style.strokeDashoffset=circ-(circ*pct/100);
 }
 function qcBindRowEvents(){
+  document.querySelectorAll('#qc-view .note-mark').forEach(el=>{
+    el.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      qcOpenNote(el.dataset.uid,el.dataset.cid);
+    });
+  });
   document.querySelectorAll('#qc-view td.qccell').forEach(td=>{
     td.onclick=()=>{
       const uid_=td.dataset.uid,ci=+td.dataset.ci;
@@ -2804,7 +2854,7 @@ function qcAttachEvents(){
         const data=JSON.parse(reader.result);
         if(data&&Array.isArray(data.units)&&Array.isArray(data.columns)){
           qcColumns=data.columns;
-          qcUnits=data.units.map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:(u.capacity!==undefined?u.capacity:(u.sn!==undefined?u.sn:(u.name||''))),tests:u.tests||[]}));
+          qcUnits=data.units.map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:(u.capacity!==undefined?u.capacity:(u.sn!==undefined?u.sn:(u.name||''))),tests:u.tests||[],notes:u.notes||{}}));
           qcProject=data.project||{name:''};
           qcSave();qcRender();
         }else{alert('올바른 백업 파일이 아니야.');}
@@ -3034,7 +3084,7 @@ function supplyRenderList(){
     if(supplyState.items.length===0){
       html+='<div class="empty-state">등록된 품목이 없습니다. 신청자 화면에서 먼저 등록해 주세요.</div>';
     }else{
-      html+='<div class="table-scroll"><table class="supply-table"><thead><tr><th style="width:36px">No</th><th class="left">상품명</th><th style="width:110px">단가</th><th style="width:60px">수량</th><th style="width:100px">금액</th><th style="width:110px">비고<small>(알파몰 코드)</small></th><th style="width:80px">신청자</th><th style="width:36px"></th></tr></thead><tbody>';
+      html+='<div class="table-scroll"><table class="supply-table"><thead><tr><th style="width:36px">No</th><th class="left">상품명</th><th style="width:100px">단가</th><th style="width:56px">수량</th><th style="width:100px">금액</th><th style="width:170px">비고<small>(알파몰 코드)</small></th><th style="width:104px">신청자</th><th style="width:44px"></th></tr></thead><tbody>';
       supplyState.items.forEach((it,i)=>{
         const amount=(Number(it.unitPrice)||0)*(Number(it.qty)||0);
         html+=`<tr data-row="${it.id}"><td class="center mono">${i+1}</td><td><div class="prod-cell">`;
@@ -3046,7 +3096,7 @@ function supplyRenderList(){
         html+=`<td><input class="cell-input price" data-id="${it.id}" data-field="unitPrice" type="number" min="0" value="${esc(it.unitPrice)}"></td>`;
         html+=`<td><input class="cell-input" data-id="${it.id}" data-field="qty" type="number" min="1" value="${esc(it.qty)}"></td>`;
         html+=`<td class="right mono amount-cell">${supplyWon(amount)}</td>`;
-        html+=`<td><input class="cell-input" data-id="${it.id}" data-field="note" value="${esc(it.note)}" placeholder="알파몰코드"></td>`;
+        html+=`<td><input class="cell-input note-field" data-id="${it.id}" data-field="note" value="${esc(it.note)}" placeholder="알파몰코드"></td>`;
         html+=`<td class="center req-name-small">${esc(it.requester)}</td>`;
         html+=`<td class="center"><button class="trash-btn" data-del="${it.id}">🗑</button></td></tr>`;
       });
