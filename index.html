@@ -1,4 +1,5 @@
 <!-- 업무 일정 관리 v6: 프로젝트 색상 직접 지정(프리셋 + 커스텀) · 테마(라이트/다크 + 강조색) · 파일/로컬 저장 · 데이터 분리 · 도움말/업데이트 이력 -->
+<meta name="color-scheme" content="light dark">
 <style>
   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
   @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
@@ -104,6 +105,9 @@
   body[data-role="leader"] #leave-request-btn{display:none !important;}
   body[data-role="member"] .ti .box{pointer-events:none;opacity:.5;}
   .leave-badge{background:#e0483f;color:#fff;font-size:10px;font-weight:800;border-radius:8px;min-width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;margin-left:4px;padding:0 4px;}
+  .photo-lightbox{position:fixed;inset:0;background:rgba(20,22,26,.86);display:none;align-items:center;justify-content:center;z-index:99999;cursor:zoom-out;padding:28px;}
+  .photo-lightbox.show{display:flex;}
+  .photo-lightbox img{max-width:92vw;max-height:92vh;border-radius:10px;box-shadow:0 24px 70px rgba(0,0,0,.5);cursor:default;}
   #leave-bell-btn .leave-badge{position:absolute;top:-4px;right:-4px;margin-left:0;box-shadow:0 0 0 2px var(--paper);}
   body[data-role="leader"] #leave-bell-btn{display:inline-flex !important;}
   body[data-role="leader"] #signup-bell-btn{display:inline-flex !important;}
@@ -592,33 +596,38 @@
     --qc-pending:#414f68;
   }
 #qc-view * {box-sizing:border-box;}
-#qc-view {margin:0;background:var(--qc-bg);color:var(--qc-text);font-family:'IBM Plex Sans KR', sans-serif;-webkit-font-smoothing:antialiased;border-radius:var(--r-sm);padding:16px;}
+#qc-view {margin:0;background:var(--qc-bg);color:var(--qc-text);font-family:'IBM Plex Sans KR', sans-serif;-webkit-font-smoothing:antialiased;border-radius:var(--r-sm);padding:16px;color-scheme:dark only;forced-color-adjust:none;}
+#qc-view * {color-scheme:dark only;forced-color-adjust:none;}
 #qc-view .wrap {max-width:1440px;margin:0 auto;padding:28px 20px 60px;}
 #qc-view header {display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:18px;}
 #qc-view .title-block {min-width:280px;}
+#qc-view .qc-project-switch {display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
+#qc-view .qc-project-switch select {min-width:160px;font-weight:600;}
 #qc-view .meta-row {display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px;}
-#qc-view .meta-input {background:transparent;border:none;border-bottom:1px dashed var(--qc-border);color:var(--qc-text);font-family:inherit;outline:none;padding:2px 1px;}
-#qc-view .meta-input::placeholder {color:#7d8aa0;}
+#qc-view .meta-input {background:transparent;border:none;border-bottom:1px dashed var(--qc-border);color:var(--qc-text) !important;font-family:inherit;outline:none;padding:3px 1px;}
+#qc-view .meta-input::placeholder {color:#8894aa !important;opacity:1 !important;}
 #qc-view .meta-input:focus {border-bottom-color:var(--qc-accent);}
-#qc-view .meta-name {font-size:20px;font-weight:700;min-width:160px;}
-#qc-view .title-block .sub {font-size:12px;color:var(--qc-text-dim);margin-top:2px;}
-#qc-view .stat-row {display:flex;gap:14px;align-items:center;}
-#qc-view .ring {position:relative;width:56px;height:56px;flex-shrink:0;}
-#qc-view .ring svg {transform:rotate(-90deg);width:56px;height:56px;}
+#qc-view .meta-name {font-size:23px;font-weight:700;min-width:180px;}
+#qc-view .title-block .sub {font-size:13px;color:var(--qc-text-dim);margin-top:2px;}
+#qc-view .stat-row {display:flex;gap:16px;align-items:center;}
+#qc-view .ring {position:relative;width:64px;height:64px;flex-shrink:0;}
+#qc-view .ring svg {transform:rotate(-90deg);width:64px;height:64px;}
 #qc-view .ring circle {fill:none;stroke-width:6;}
 #qc-view .ring .bg {stroke:var(--qc-panel-2);}
 #qc-view .ring .fg {stroke:var(--qc-accent);stroke-linecap:round;transition:stroke-dashoffset .3s;}
-#qc-view .ring .pct {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:12px;font-weight:600;}
-#qc-view .stat-nums {font-family:'IBM Plex Mono';font-size:12.5px;color:var(--qc-text-dim);line-height:1.5;}
+#qc-view .ring .pct {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:13.5px;font-weight:600;}
+#qc-view .stat-nums {font-family:'IBM Plex Mono';font-size:14px;color:var(--qc-text-dim);line-height:1.6;}
 #qc-view .stat-nums b {color:var(--qc-text);font-weight:600;}
-#qc-view .toolbar {display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:10px 12px;margin-bottom:12px;}
-#qc-view .toolbar .grp {display:flex;gap:6px;align-items:center;padding-right:10px;border-right:1px solid var(--qc-border);}
+#qc-view .toolbar {display:flex;flex-wrap:wrap;gap:9px;align-items:center;background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+#qc-view .toolbar .grp {display:flex;gap:7px;align-items:center;padding-right:11px;border-right:1px solid var(--qc-border);}
 #qc-view .toolbar .grp:last-child {border-right:none;padding-right:0;}
-#qc-view input[type=text], #qc-view input[type=number] {background:var(--qc-panel-2);border:1px solid var(--qc-border);color:var(--qc-text);border-radius:6px;padding:6px 9px;font-family:inherit;font-size:12.5px;outline:none;}
+#qc-view input[type=text], #qc-view input[type=number] {background:var(--qc-panel-2) !important;border:1px solid var(--qc-border);color:var(--qc-text) !important;border-radius:6px;padding:8px 11px;font-family:inherit;font-size:14px;outline:none;}
+#qc-view input[type=text]::placeholder, #qc-view input[type=number]::placeholder {color:#8894aa !important;opacity:1 !important;}
 #qc-view input[type=text]:focus, #qc-view input[type=number]:focus {border-color:var(--qc-accent);}
-#qc-view input[type=number] {width:60px;}
-#qc-view select {background:var(--qc-panel-2);border:1px solid var(--qc-border);color:var(--qc-text);border-radius:6px;padding:6px 8px;font-family:inherit;font-size:12.5px;outline:none;}
-#qc-view button {background:var(--qc-panel-2);border:1px solid var(--qc-border);color:var(--qc-text);border-radius:6px;padding:6px 11px;font-family:inherit;font-size:12.5px;cursor:pointer;transition:background .15s, border-color .15s;}
+#qc-view input[type=number] {width:68px;}
+#qc-view select {background:var(--qc-panel-2) !important;border:1px solid var(--qc-border);color:var(--qc-text) !important;border-radius:6px;padding:8px 10px;font-family:inherit;font-size:14px;outline:none;}
+#qc-view select option {background:var(--qc-panel-2);color:var(--qc-text);}
+#qc-view button {background:var(--qc-panel-2);border:1px solid var(--qc-border);color:var(--qc-text);border-radius:6px;padding:8px 13px;font-family:inherit;font-size:13.5px;cursor:pointer;transition:background .15s, border-color .15s;}
 #qc-view button:hover {background:#3a465c;border-color:#5a6b88;}
 #qc-view button.primary {background:var(--qc-accent-dim);border-color:var(--qc-accent);color:#bdf3ee;}
 #qc-view button.primary:hover {background:#2f6a63;}
@@ -626,80 +635,81 @@
 #qc-view button.danger:hover {border-color:#c04b30;}
 #qc-view button.tab {background:transparent;border-color:transparent;color:var(--qc-text-dim);}
 #qc-view button.tab.active {background:var(--qc-panel-2);border-color:var(--qc-border);color:var(--qc-text);}
-#qc-view .panel {display:none;margin-bottom:14px;background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:12px;}
+#qc-view .panel {display:none;margin-bottom:14px;background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:14px;}
 #qc-view .panel.open {display:block;}
-#qc-view .panel textarea {width:100%;min-height:90px;background:var(--qc-panel-2);border:1px solid var(--qc-border);color:var(--qc-text);border-radius:6px;padding:8px;font-family:'IBM Plex Mono';font-size:12px;resize:vertical;outline:none;}
-#qc-view .panel .hint {font-size:11.5px;color:var(--qc-text-dim);margin:0 0 8px;}
-#qc-view .panel .actions {display:flex;gap:8px;justify-content:flex-end;margin-top:8px;}
-#qc-view .col-list {display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto;margin-bottom:10px;}
-#qc-view .col-row {display:flex;gap:8px;align-items:center;background:var(--qc-panel-2);border:1px solid var(--qc-border);border-radius:6px;padding:6px 8px;transition:opacity .15s, border-color .15s;}
+#qc-view .panel textarea {width:100%;min-height:100px;background:var(--qc-panel-2) !important;border:1px solid var(--qc-border);color:var(--qc-text) !important;border-radius:6px;padding:10px;font-family:'IBM Plex Mono';font-size:13.5px;resize:vertical;outline:none;}
+#qc-view .panel .hint {font-size:12.5px;color:var(--qc-text-dim);margin:0 0 9px;}
+#qc-view .panel .actions {display:flex;gap:8px;justify-content:flex-end;margin-top:9px;}
+#qc-view .col-list {display:flex;flex-direction:column;gap:7px;max-height:280px;overflow:auto;margin-bottom:11px;}
+#qc-view .col-row {display:flex;gap:9px;align-items:center;background:var(--qc-panel-2);border:1px solid var(--qc-border);border-radius:6px;padding:7px 9px;transition:opacity .15s, border-color .15s;}
 #qc-view .col-row.dragging {opacity:.35;}
 #qc-view .col-row.drag-over-top {box-shadow:inset 0 2px 0 var(--qc-accent);}
 #qc-view .col-row.drag-over-bottom {box-shadow:inset 0 -2px 0 var(--qc-accent);}
-#qc-view .col-row .handle {cursor:grab;color:var(--qc-text-dim);font-size:13px;letter-spacing:-1px;flex-shrink:0;user-select:none;}
+#qc-view .col-row .handle {cursor:grab;color:var(--qc-text-dim);font-size:14px;letter-spacing:-1px;flex-shrink:0;user-select:none;}
 #qc-view .col-row .handle:active {cursor:grabbing;}
 #qc-view .col-row .move-btns {display:flex;flex-direction:column;gap:0;flex-shrink:0;}
-#qc-view .col-row .move-btn {cursor:pointer;color:var(--qc-text-dim);font-size:9px;line-height:1;padding:1px 2px;}
+#qc-view .col-row .move-btn {cursor:pointer;color:var(--qc-text-dim);font-size:10px;line-height:1;padding:1px 3px;}
 #qc-view .col-row .move-btn:hover {color:var(--qc-accent);}
 #qc-view .col-row .move-btn.disabled {opacity:.2;pointer-events:none;}
-#qc-view .col-row input[type=text] {flex:1;background:transparent;border:none;color:var(--qc-text);font-size:12.5px;padding:2px;}
-#qc-view .col-row .tag-dot {width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+#qc-view .col-row input[type=text] {flex:1;background:transparent !important;border:none;color:var(--qc-text) !important;font-size:14px;padding:3px;}
+#qc-view .col-row .tag-dot {width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 #qc-view .col-row .tag-dot.routine {background:var(--qc-accent);}
 #qc-view .col-row .tag-dot.type {background:var(--qc-type);}
-#qc-view .col-row .del {color:var(--qc-text-dim);cursor:pointer;font-size:15px;padding:0 4px;}
+#qc-view .col-row .del {color:var(--qc-text-dim);cursor:pointer;font-size:16px;padding:0 5px;}
 #qc-view .col-row .del:hover {color:#f0a493;}
-#qc-view .col-add {display:flex;gap:8px;align-items:center;border-top:1px solid var(--qc-border);padding-top:10px;}
+#qc-view .col-add {display:flex;gap:9px;align-items:center;border-top:1px solid var(--qc-border);padding-top:11px;}
 #qc-view .col-add input[type=text] {flex:1;}
-#qc-view .arc-row {display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--qc-panel-2);border:1px solid var(--qc-border);border-radius:6px;padding:8px 10px;}
-#qc-view .arc-name {font-weight:600;font-size:13px;}
-#qc-view .arc-meta {font-size:11.5px;color:var(--qc-text-dim);margin-top:2px;}
+#qc-view .arc-row {display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--qc-panel-2);border:1px solid var(--qc-border);border-radius:6px;padding:9px 11px;}
+#qc-view .arc-name {font-weight:600;font-size:14.5px;}
+#qc-view .arc-meta {font-size:12.5px;color:var(--qc-text-dim);margin-top:2px;}
 #qc-view .arc-actions {display:flex;gap:6px;flex-shrink:0;}
-#qc-view .table-scroll {overflow:auto;border:1px solid var(--qc-border);border-radius:10px;background:var(--qc-panel);max-height:68vh;}
-#qc-view table {border-collapse:separate;border-spacing:0;font-size:12.5px;}
+#qc-view .table-scroll {overflow:auto;border:1px solid var(--qc-border);border-radius:10px;background:var(--qc-panel);max-height:70vh;}
+#qc-view table {border-collapse:separate;border-spacing:0;font-size:14.5px;}
 #qc-view th, #qc-view td {border-bottom:1px solid var(--qc-border);border-right:1px solid var(--qc-border);white-space:nowrap;}
 #qc-view thead th {position:sticky;top:0;background:var(--qc-panel-2);z-index:3;padding:0;font-weight:600;}
-#qc-view thead th.colname {padding:10px 12px;position:relative;text-align:center;}
+#qc-view thead th.colname {padding:12px 14px;position:relative;text-align:center;}
 #qc-view thead th.colname::before {content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--qc-accent);}
 #qc-view thead th.colname.type::before {background:var(--qc-type);}
-#qc-view thead th.colname .lbl {display:inline-block;white-space:nowrap;font-size:12px;color:var(--qc-text-dim);font-weight:600;}
+#qc-view thead th.colname .lbl {display:inline-block;white-space:nowrap;font-size:13.5px;color:var(--qc-text-dim);font-weight:600;}
 #qc-view thead th.corner {position:sticky;top:0;z-index:5;background:var(--qc-panel-2);}
-#qc-view thead th.corner-no {left:0;width:64px;min-width:64px;text-align:center;}
-#qc-view thead th.corner-cap {left:64px;min-width:110px;text-align:left;padding-left:10px;}
-#qc-view thead th.progresshead {position:sticky;top:0;z-index:3;background:var(--qc-panel-2);min-width:64px;font-size:11px;color:var(--qc-text-dim);font-weight:500;}
-#qc-view tbody th.rowno {position:sticky;left:0;background:var(--qc-panel);z-index:2;text-align:center;font-family:'IBM Plex Mono';font-size:12.5px;color:var(--qc-text-dim);width:64px;min-width:64px;padding:0;}
-#qc-view tbody th.rowno input {background:transparent;border:none;color:var(--qc-text);font-family:'IBM Plex Mono';font-size:12.5px;width:100%;text-align:center;padding:9px 2px;outline:none;}
-#qc-view tbody th.rowno input:focus {color:var(--qc-accent);}
-#qc-view tbody th.rowname {position:sticky;left:64px;background:var(--qc-panel);z-index:2;text-align:left;padding:0 10px;font-family:'IBM Plex Mono';font-size:12.5px;font-weight:500;min-width:150px;max-width:220px;overflow:hidden;text-overflow:ellipsis;}
+#qc-view thead th.corner-no {left:0;width:74px;min-width:74px;text-align:center;}
+#qc-view thead th.corner-cap {left:74px;min-width:130px;text-align:left;padding-left:12px;}
+#qc-view thead th.progresshead {position:sticky;top:0;z-index:3;background:var(--qc-panel-2);min-width:72px;font-size:12.5px;color:var(--qc-text-dim);font-weight:500;}
+#qc-view tbody th.rowno {position:sticky;left:0;background:var(--qc-panel);z-index:2;text-align:center;font-family:'IBM Plex Mono';font-size:14px;color:var(--qc-text-dim);width:74px;min-width:74px;padding:0;}
+#qc-view tbody th.rowno input {background:transparent !important;border:none;color:var(--qc-text) !important;font-family:'IBM Plex Mono';font-size:14.5px;font-weight:600;width:100%;text-align:center;padding:11px 2px;outline:none;}
+#qc-view tbody th.rowno input:focus {color:var(--qc-accent) !important;}
+#qc-view tbody th.rowname {position:sticky;left:74px;background:var(--qc-panel);z-index:2;text-align:left;padding:0 12px;font-family:'IBM Plex Mono';font-size:14px;font-weight:500;min-width:170px;max-width:240px;overflow:hidden;text-overflow:ellipsis;}
 #qc-view tbody tr:hover th.rowno, #qc-view tbody tr:hover th.rowname, #qc-view tbody tr:hover td {background:#3a465c;}
 #qc-view tbody th.rowname .row-inner {display:flex;align-items:center;justify-content:space-between;gap:6px;}
-#qc-view tbody th.rowname .del {opacity:0;color:var(--qc-text-dim);font-size:14px;cursor:pointer;padding:2px 4px;line-height:1;}
+#qc-view tbody th.rowname .del {opacity:0;color:var(--qc-text-dim);font-size:15px;cursor:pointer;padding:2px 5px;line-height:1;}
 #qc-view tbody tr:hover th.rowname .del {opacity:1;}
 #qc-view tbody th.rowname .del:hover {color:#f0a493;}
-#qc-view tbody th.rowname input {background:transparent;border:none;color:var(--qc-text);font-family:'IBM Plex Mono';font-size:12.5px;width:100%;padding:9px 0;outline:none;}
-#qc-view tbody th.rowname input:focus {color:var(--qc-accent);}
-#qc-view td.cell {min-width:52px;height:40px;text-align:center;cursor:pointer;padding:0 8px;user-select:none;}
-#qc-view td.cell.typecol {background:rgba(240,187,82,.07);}
-#qc-view td.cell .dot {width:20px;height:20px;border-radius:5px;margin:0 auto;background:var(--qc-pending);border:1px solid #5a6883;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;line-height:1;}
-#qc-view td.cell:active .dot {transform:scale(.85);}
-#qc-view td.cell.done .dot {background:var(--qc-ok);border-color:var(--qc-ok);}
-#qc-view td.cell.exempt .dot {background:transparent;border:1px dashed var(--qc-type);color:var(--qc-type);}
-#qc-view td.progress {background:var(--qc-panel);font-family:'IBM Plex Mono';font-size:11.5px;color:var(--qc-text-dim);text-align:center;min-width:64px;}
+#qc-view tbody th.rowname input {background:transparent !important;border:none;color:var(--qc-text) !important;font-family:'IBM Plex Mono';font-size:14px;width:100%;padding:11px 0;outline:none;}
+#qc-view tbody th.rowname input:focus {color:var(--qc-accent) !important;}
+#qc-view td.qccell {min-width:58px;height:46px;text-align:center;cursor:pointer;padding:0 8px;user-select:none;background:var(--qc-panel) !important;}
+#qc-view td.qccell.typecol {background:rgba(240,187,82,.07);}
+#qc-view td.qccell .dot {width:26px;height:26px;border-radius:6px;margin:0 auto;background:var(--qc-pending) !important;border:1px solid #5a6883;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;line-height:1;color:var(--qc-text);}
+#qc-view td.qccell:active .dot {transform:scale(.85);}
+#qc-view td.qccell.done .dot {background:var(--qc-ok) !important;border-color:var(--qc-ok) !important;color:#0e2417;}
+#qc-view td.qccell.exempt .dot {background:transparent !important;border:1px dashed var(--qc-type);color:var(--qc-type) !important;}
+#qc-view td.progress {background:var(--qc-panel);font-family:'IBM Plex Mono';font-size:12.5px;color:var(--qc-text-dim);text-align:center;min-width:70px;}
 #qc-view tbody tr.complete th.rowname {box-shadow:inset 3px 0 0 var(--qc-ok);}
 #qc-view tbody tr:hover td.progress {background:#3a465c;}
 #qc-view tfoot th, #qc-view tfoot td {position:sticky;bottom:0;background:var(--qc-panel-2);z-index:2;border-top:1px solid var(--qc-border);border-bottom:none;}
-#qc-view tfoot th.corner {left:0;z-index:4;text-align:left;padding:8px 10px;font-size:11px;color:var(--qc-text-dim);}
-#qc-view tfoot td.colsum {text-align:center;font-family:'IBM Plex Mono';font-size:11px;color:var(--qc-text-dim);padding:6px 2px;}
+#qc-view tfoot th.corner {left:0;z-index:4;text-align:left;padding:9px 11px;font-size:12px;color:var(--qc-text-dim);}
+#qc-view tfoot td.colsum {text-align:center;font-family:'IBM Plex Mono';font-size:12px;color:var(--qc-text-dim);padding:7px 2px;}
 #qc-view tfoot td.colsum.full {color:var(--qc-ok);}
-#qc-view .legend {display:flex;gap:16px;align-items:center;margin-top:12px;font-size:11.5px;color:var(--qc-text-dim);flex-wrap:wrap;}
-#qc-view .legend .item {display:flex;align-items:center;gap:6px;}
-#qc-view .legend .sw {width:13px;height:13px;border-radius:3px;border:1px solid #5a6883;}
+#qc-view .legend {display:flex;gap:18px;align-items:center;margin-top:13px;font-size:12.5px;color:var(--qc-text-dim);flex-wrap:wrap;}
+#qc-view .legend .item {display:flex;align-items:center;gap:7px;}
+#qc-view .legend .sw {width:15px;height:15px;border-radius:3px;border:1px solid #5a6883;}
 #qc-view .legend .sw.pending {background:var(--qc-pending);}
 #qc-view .legend .sw.done {background:var(--qc-ok);border-color:var(--qc-ok);}
-#qc-view .legend .sw.exempt {background:transparent;border:1px dashed var(--qc-type);color:var(--qc-type);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
-#qc-view .legend .sw.dot {border-radius:50%;border:none;width:9px;height:9px;}
+#qc-view .legend .sw.exempt {background:transparent;border:1px dashed var(--qc-type);color:var(--qc-type);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+#qc-view .legend .sw.dot {border-radius:50%;border:none;width:10px;height:10px;}
 #qc-view .legend .sw.dot.routine {background:var(--qc-accent);}
 #qc-view .legend .sw.dot.type {background:var(--qc-type);}
-#qc-view .empty-msg {padding:40px;text-align:center;color:var(--qc-text-dim);font-size:13px;}
+#qc-view .empty-msg {padding:44px;text-align:center;color:var(--qc-text-dim);font-size:14.5px;}
+#qc-view ::-webkit-scrollbar {height:10px;width:10px;}
 #qc-view ::-webkit-scrollbar {height:10px;width:10px;}
 #qc-view ::-webkit-scrollbar-track {background:var(--qc-panel);}
 #qc-view ::-webkit-scrollbar-thumb {background:#4a5872;border-radius:5px;}
@@ -798,6 +808,7 @@
 }
 </style>
 
+<div class="photo-lightbox" id="photo-lightbox" onclick="closePhotoLightbox()"><img id="photo-lightbox-img" src=""></div>
 <div id="app">
   <div class="topbar">
     <div class="brand">
@@ -1037,11 +1048,20 @@ function subscribeRealtime(){
       renderSignupBellModal();
     }).subscribe();
   }
-  sb.channel('qc_tracker_ch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'qc_tracker_data',filter:'id=eq.main'},payload=>{
+  sb.channel('qc_tracker_ch').on('postgres_changes',{event:'*',schema:'public',table:'qc_tracker_data'},payload=>{
     if(Date.now()-lastSelfQcSaveAt<2000)return;
-    const p=payload.new.payload||{};
-    qcColumns=p.columns||qcDefaultColumns();qcUnits=p.units||[];qcProject=p.project||{name:''};
-    if(viewMode==='qc')qcRender();
+    const rowId=(payload.new&&payload.new.id)||(payload.old&&payload.old.id);
+    if(payload.eventType==='DELETE'){
+      qcProjects=qcProjects.filter(x=>x.id!==rowId);
+      if(rowId===qcActiveId&&qcProjects.length)qcSwitchProject(qcProjects[0].id,true);
+    }else{
+      const p=payload.new.payload||{};
+      const name=(p.project&&p.project.name)||'(이름 없음)';
+      const existing=qcProjects.find(x=>x.id===rowId);
+      if(existing)existing.name=name; else qcProjects.push({id:rowId,name});
+      if(rowId===qcActiveId){qcApplyPayload(p);if(viewMode==='qc')qcRender();}
+    }
+    if(viewMode==='qc')qcRenderProjectSelect();
   }).subscribe();
   sb.channel('supply_items_ch').on('postgres_changes',{event:'*',schema:'public',table:'supply_items'},async()=>{
     if(Date.now()-lastSelfSupplyChangeAt<2000)return;
@@ -1369,6 +1389,8 @@ function dday(e){
   return {txt:`D-${diff}`,cls:'norm'};
 }
 function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function openPhotoLightbox(src){document.getElementById('photo-lightbox-img').src=src;document.getElementById('photo-lightbox').classList.add('show');}
+function closePhotoLightbox(){document.getElementById('photo-lightbox').classList.remove('show');}
 function projAllIds(){const ids=data.projects.map(p=>p.id);if(data.events.some(e=>!e.projectId))ids.push('__none');return ids;}
 function passProj(e){if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
 
@@ -2340,6 +2362,7 @@ function tick(){const d=new Date();document.getElementById('clock').textContent=
 
 /* ═══════════ 시험 진행 관리(QC 트래커) — 팀 전체 공유, 전원 편집 가능 ═══════════ */
 let qcColumns=[], qcUnits=[], qcProject={name:''}, qcFilterCat='all', qcDragSrcId=null;
+let qcProjects=[], qcActiveId='main';
 let lastSelfQcSaveAt=0;
 
 function qcDefaultColumns(){
@@ -2353,20 +2376,71 @@ function qcNextNo(){
 function qcNewUnit(cap, no){
   return { id: uid(), no: (no!==undefined?no:qcNextNo()), capacity: cap||'', tests: new Array(qcColumns.length).fill(0) };
 }
+function qcApplyPayload(payload){
+  qcColumns=(payload&&payload.columns)||qcDefaultColumns();
+  qcUnits=((payload&&payload.units)||[]).map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:u.capacity||'',tests:u.tests||[]}));
+  qcProject=(payload&&payload.project)||{name:''};
+}
 async function qcLoadData(){
-  const {data:row}=await sb.from('qc_tracker_data').select('payload').eq('id','main').maybeSingle();
-  const payload=(row&&row.payload&&Object.keys(row.payload).length)?row.payload:null;
-  if(payload){
-    qcColumns=payload.columns||qcDefaultColumns();
-    qcUnits=(payload.units||[]).map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:u.capacity||'',tests:u.tests||[]}));
-    qcProject=payload.project||{name:''};
-  }else{
-    qcColumns=qcDefaultColumns();qcUnits=[];qcProject={name:''};
+  const {data:rows}=await sb.from('qc_tracker_data').select('id,payload').order('updated_at',{ascending:true});
+  if(!rows||rows.length===0){
+    qcActiveId='main';
+    qcApplyPayload(null);
+    qcProjects=[{id:'main',name:'(이름 없음)'}];
+    await sb.from('qc_tracker_data').insert({id:'main',payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
+    return;
   }
+  qcProjects=rows.map(r=>({id:r.id,name:(r.payload&&r.payload.project&&r.payload.project.name)||'(이름 없음)'}));
+  let saved=null;
+  try{saved=localStorage.getItem('qc-active-project-id');}catch(e){}
+  const target=rows.find(r=>r.id===saved)||rows[0];
+  qcActiveId=target.id;
+  qcApplyPayload(target.payload);
 }
 async function qcSave(){
   lastSelfQcSaveAt=Date.now();
-  await sb.from('qc_tracker_data').update({payload:{columns:qcColumns,units:qcUnits,project:qcProject},updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id','main');
+  await sb.from('qc_tracker_data').update({payload:{columns:qcColumns,units:qcUnits,project:qcProject},updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id',qcActiveId);
+  const p=qcProjects.find(x=>x.id===qcActiveId);
+  if(p)p.name=(qcProject.name&&qcProject.name.trim())||'(이름 없음)';
+}
+async function qcSwitchProject(id,skipSaveCurrent){
+  if(id===qcActiveId||!id)return;
+  if(!skipSaveCurrent)await qcSave();
+  const {data:row}=await sb.from('qc_tracker_data').select('payload').eq('id',id).maybeSingle();
+  qcActiveId=id;
+  try{localStorage.setItem('qc-active-project-id',id);}catch(e){}
+  qcApplyPayload(row&&row.payload);
+  qcRender();
+  qcRenderProjectSelect();
+}
+async function qcCreateProject(){
+  const name=prompt('새 프로젝트 이름을 입력해줘 (나중에 바꿀 수 있어)','');
+  if(name===null)return;
+  await qcSave();
+  const newId=uid();
+  const newColumns=qcDefaultColumns();
+  const newProject={name:name.trim()};
+  await sb.from('qc_tracker_data').insert({id:newId,payload:{columns:newColumns,units:[],project:newProject}});
+  qcProjects.push({id:newId,name:newProject.name||'(이름 없음)'});
+  qcActiveId=newId;
+  try{localStorage.setItem('qc-active-project-id',newId);}catch(e){}
+  qcColumns=newColumns;qcUnits=[];qcProject=newProject;
+  qcRender();
+  qcRenderProjectSelect();
+}
+async function qcDeleteProject(id){
+  if(qcProjects.length<=1){alert('마지막 남은 프로젝트는 삭제할 수 없어. 내용을 비우려면 "전체 초기화"를 써줘.');return;}
+  const p=qcProjects.find(x=>x.id===id);
+  if(!confirm(`"${p?p.name:''}" 프로젝트를 목록에서 완전히 삭제할까? 되돌릴 수 없어.`))return;
+  await sb.from('qc_tracker_data').delete().eq('id',id);
+  qcProjects=qcProjects.filter(x=>x.id!==id);
+  if(qcActiveId===id)await qcSwitchProject(qcProjects[0].id,true);
+  else qcRenderProjectSelect();
+}
+function qcRenderProjectSelect(){
+  const sel=document.getElementById('qcProjectSelect');
+  if(!sel)return;
+  sel.innerHTML=qcProjects.map(p=>`<option value="${p.id}" ${p.id===qcActiveId?'selected':''}>${esc(p.name||'(이름 없음)')}</option>`).join('');
 }
 async function qcLoadArchive(){
   const {data:rows}=await sb.from('qc_tracker_archive').select('*').order('saved_at',{ascending:false});
@@ -2374,12 +2448,26 @@ async function qcLoadArchive(){
 }
 async function qcSaveAndReset(){
   if(qcUnits.length===0 && !qcProject.name.trim()){alert('저장할 내용이 없어.');return;}
-  if(!confirm('현재 화면을 기록으로 저장하고, 새 화면으로 시작할까?'))return;
+  if(!confirm('현재 프로젝트를 완료 처리해서 "지난 기록"으로 옮길까? 활성 목록에서는 사라져.'))return;
   const label=qcProject.name.trim()||('프로젝트 '+new Date().toLocaleString('ko-KR'));
   await sb.from('qc_tracker_archive').insert({name:label,payload:{columns:JSON.parse(JSON.stringify(qcColumns)),units:JSON.parse(JSON.stringify(qcUnits))}});
-  qcColumns=qcDefaultColumns();qcUnits=[];qcProject={name:''};
-  await qcSave();
+  const doneId=qcActiveId;
+  await sb.from('qc_tracker_data').delete().eq('id',doneId);
+  qcProjects=qcProjects.filter(p=>p.id!==doneId);
+  if(qcProjects.length===0){
+    const newId=uid();
+    qcColumns=qcDefaultColumns();qcUnits=[];qcProject={name:''};
+    await sb.from('qc_tracker_data').insert({id:newId,payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
+    qcActiveId=newId;
+    qcProjects=[{id:newId,name:'(이름 없음)'}];
+    try{localStorage.setItem('qc-active-project-id',newId);}catch(e){}
+  }else{
+    qcActiveId=null; // 삭제된 프로젝트로 스킵 저장되지 않도록
+    await qcSwitchProject(qcProjects[0].id,true);
+    return;
+  }
   qcRender();
+  qcRenderProjectSelect();
 }
 function qcVisibleColumns(){
   if(qcFilterCat==='all')return qcColumns.map((c,i)=>({...c,idx:i}));
@@ -2399,6 +2487,11 @@ function qcRenderShell(){
   wrap.innerHTML=`<div id="qc-view"><div class="wrap">
     <header>
       <div class="title-block">
+        <div class="qc-project-switch">
+          <select id="qcProjectSelect"></select>
+          <button id="qcBtnAddProject" title="새 프로젝트 만들기">+ 새 프로젝트</button>
+          <button class="danger" id="qcBtnDelProject" title="현재 프로젝트를 목록에서 삭제">🗑</button>
+        </div>
         <div class="meta-row"><input type="text" id="qcProjName" class="meta-input meta-name" placeholder="프로젝트명"></div>
         <div class="sub">호기별 시험 항목 완료 체크 · 클릭으로 상태 전환 · 자동 저장 · 팀 전체 공유</div>
       </div>
@@ -2442,6 +2535,7 @@ function qcRenderShell(){
     </div>
   </div></div>`;
   qcAttachEvents();
+  qcRenderProjectSelect();
   qcRender();
 }
 function qcRender(){
@@ -2460,14 +2554,14 @@ function qcRender(){
       const complete=totalCols>0&&done===totalCols;
       const cells=cols.map(c=>{
         const own=u.tests[c.idx]||0;
-        let cls='',mark='';
-        if(own===1){cls='done';}
-        else if(qcIsEffDone(u,c.idx)){cls='exempt';mark='×';}
-        return `<td class="cell ${cls} ${c.category==='type'?'typecol':''}" data-uid="${u.id}" data-ci="${c.idx}"><div class="dot">${mark}</div></td>`;
+        let cls='',mark='',dotStyle='background:#414f68 !important;border-color:#5a6883 !important;color:#f2f4f8 !important;';
+        if(own===1){cls='done';dotStyle='background:#43d68a !important;border-color:#43d68a !important;color:#0e2417 !important;';}
+        else if(qcIsEffDone(u,c.idx)){cls='exempt';mark='×';dotStyle='background:transparent !important;border:1px dashed #f0bb52 !important;color:#f0bb52 !important;';}
+        return `<td class="qccell ${cls} ${c.category==='type'?'typecol':''}" data-uid="${u.id}" data-ci="${c.idx}"><div class="dot" style="${dotStyle}">${mark}</div></td>`;
       }).join('');
       return `<tr class="${complete?'complete':''}">
-        <th class="rowno"><input type="text" value="${esc(u.no)}" data-uid="${u.id}" class="qcNoInput"></th>
-        <th class="rowname"><div class="row-inner"><input type="text" value="${esc(u.capacity)}" data-uid="${u.id}" class="qcCapInput" placeholder="예: 2000kVA" list="qcCapList"><span class="del" data-uid="${u.id}" title="삭제">×</span></div></th>
+        <th class="rowno"><input type="text" value="${esc(u.no)}" data-uid="${u.id}" class="qcNoInput" style="background:transparent !important;color:#f2f4f8 !important;"></th>
+        <th class="rowname"><div class="row-inner"><input type="text" value="${esc(u.capacity)}" data-uid="${u.id}" class="qcCapInput" placeholder="예: 2000kVA" list="qcCapList" style="background:transparent !important;color:#f2f4f8 !important;"><span class="del" data-uid="${u.id}" title="삭제">×</span></div></th>
         ${cells}
         <td class="progress">${done}/${totalCols}</td>
       </tr>`;
@@ -2505,7 +2599,7 @@ function qcUpdateStats(){
   document.getElementById('qcRingFg').style.strokeDashoffset=circ-(circ*pct/100);
 }
 function qcBindRowEvents(){
-  document.querySelectorAll('#qc-view td.cell').forEach(td=>{
+  document.querySelectorAll('#qc-view td.qccell').forEach(td=>{
     td.onclick=()=>{
       const uid_=td.dataset.uid,ci=+td.dataset.ci;
       const u=qcUnits.find(x=>x.id===uid_);
@@ -2630,7 +2724,14 @@ async function qcRenderArchivePanel(){
   });
 }
 function qcAttachEvents(){
-  document.getElementById('qcProjName').onchange=(e)=>{qcProject.name=e.target.value.trim();qcSave();};
+  document.getElementById('qcProjName').onchange=(e)=>{
+    qcProject.name=e.target.value.trim();
+    qcSave();
+    qcRenderProjectSelect();
+  };
+  document.getElementById('qcProjectSelect').onchange=(e)=>qcSwitchProject(e.target.value);
+  document.getElementById('qcBtnAddProject').onclick=qcCreateProject;
+  document.getElementById('qcBtnDelProject').onclick=()=>qcDeleteProject(qcActiveId);
   document.getElementById('qcBtnAddRows').onclick=()=>{qcUnits.push(qcNewUnit(''));qcSave();qcRender();};
   document.getElementById('qcBtnTogglePaste').onclick=()=>{
     document.getElementById('qcColPanel').classList.remove('open');
@@ -2818,7 +2919,7 @@ function renderSuppliesView(){
   let html='<div id="supply-view"><div class="wrap">';
   html+='<div class="eyebrow"><span class="dot"></span>LSPS 품질팀 · 사무용품 발주 시스템</div>';
   html+='<h1>사무용품 발주 신청</h1>';
-  html+='<p class="subtitle">신청자는 상품명·구매 링크·사진·수량·단가·비고(알파몰 상품코드)를 모두 입력해서 등록해 주세요. 담당자 화면에서 최종 확인 후 필요하면 값을 수정할 수 있습니다.</p>';
+  html+='<p class="subtitle">신청자는 상품명·구매 링크·사진·수량·단가를 입력해서 등록해 주세요. 비고(알파몰 상품코드)는 알 때만 적으면 됩니다. 담당자 화면에서 최종 확인 후 필요하면 값을 수정할 수 있습니다.</p>';
   if(showAdmin){
     html+='<div class="tabs">';
     html+=`<button class="tab-btn ${supplyState.view==='requester'?'active':''}" data-view="requester">👥 신청자 화면</button>`;
@@ -2836,7 +2937,7 @@ function renderSuppliesView(){
       <div class="form-body">
         <div class="row"><input class="field" id="sp-f-name" placeholder="상품명 (예: A4 용지 500매)"><input class="field mono w-24" id="sp-f-qty" type="number" min="1" value="1"></div>
         <div class="row"><div class="link-wrap"><span class="li-icon">🔗</span><input class="field" id="sp-f-link" placeholder="구매 링크 *"></div><div class="field w-40" style="background:var(--sp-bg);color:var(--sp-ink-soft);display:flex;align-items:center;">신청자: ${esc(profile.name)}</div></div>
-        <div class="row"><input class="field mono w-40" id="sp-f-price" type="number" min="0" placeholder="단가 * (원)"><input class="field mono" id="sp-f-note" placeholder="알파몰 상품코드 *"></div>
+        <div class="row"><input class="field mono w-40" id="sp-f-price" type="number" min="0" placeholder="단가 * (원)"><input class="field mono" id="sp-f-note" placeholder="알파몰 상품코드 (모르면 비워두세요)"></div>
         <div class="btnrow">
           <input type="file" accept="image/*" id="sp-f-photo" style="display:none">
           <label class="attach-label" for="sp-f-photo" id="sp-attach-label">🖼 <span id="sp-attach-label-text">파일 선택</span></label>
@@ -2877,7 +2978,7 @@ function supplyAttachShellEvents(){
       const priceRaw=document.getElementById('sp-f-price').value;
       const note=document.getElementById('sp-f-note').value.trim();
       const priceValid=String(priceRaw).trim()!==''&&Number(priceRaw)>0;
-      if(!name||!link||!supplyState.photoData||!priceValid||!note){supplyShowFormError('상품명·구매 링크·사진·단가·비고를 모두 입력해 주세요.');return;}
+      if(!name||!link||!supplyState.photoData||!priceValid){supplyShowFormError('상품명·구매 링크·사진·단가를 입력해 주세요.');return;}
       supplyShowFormError('');
       const submitBtn=document.getElementById('sp-submit-btn');if(submitBtn)submitBtn.disabled=true;
       const item={name,link,photo:supplyState.photoData,qty,unitPrice:Number(priceRaw)||0,note,requester:profile.name};
@@ -2916,7 +3017,7 @@ function supplyRenderList(){
       supplyState.items.forEach(it=>{
         const canDel=isSupplyAdmin()||it.requesterId===profile.id;
         html+='<div class="req-card">';
-        html+=`<img class="req-thumb" src="${it.photo}">`;
+        html+=`<img class="req-thumb" src="${it.photo}" data-photo-view="${it.id}" style="cursor:zoom-in">`;
         html+='<div class="req-info">';
         html+=`<div class="req-name-row"><span class="req-name">${esc(it.name)}</span><span class="qty-badge">x${esc(it.qty)}</span></div>`;
         if(it.link)html+=`<a class="req-link" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${esc(it.link)}</a>`;
@@ -2937,7 +3038,7 @@ function supplyRenderList(){
       supplyState.items.forEach((it,i)=>{
         const amount=(Number(it.unitPrice)||0)*(Number(it.qty)||0);
         html+=`<tr data-row="${it.id}"><td class="center mono">${i+1}</td><td><div class="prod-cell">`;
-        html+=it.photo?`<img class="prod-thumb" src="${it.photo}">`:'<div class="prod-thumb-empty"></div>';
+        html+=it.photo?`<img class="prod-thumb" src="${it.photo}" data-photo-view="${it.id}" style="cursor:zoom-in">`:'<div class="prod-thumb-empty"></div>';
         html+='<div style="min-width:0">';
         html+=`<div class="prod-name">${esc(it.name)}</div>`;
         if(it.link)html+=`<a class="prod-link" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">${esc(it.link)}</a>`;
@@ -2959,6 +3060,12 @@ function supplyRenderList(){
 }
 function supplyAttachListEvents(){
   const box=document.getElementById('sp-list-container');
+  box.querySelectorAll('[data-photo-view]').forEach(img=>{
+    img.addEventListener('click',()=>{
+      const item=supplyState.items.find(it=>it.id===img.dataset.photoView);
+      if(item&&item.photo)openPhotoLightbox(item.photo);
+    });
+  });
   box.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click',async()=>{
       const id=btn.dataset.del;
