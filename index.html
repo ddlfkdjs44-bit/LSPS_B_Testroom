@@ -1,3 +1,5 @@
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- 업무 일정 관리 v6: 프로젝트 색상 직접 지정(프리셋 + 커스텀) · 테마(라이트/다크 + 강조색) · 파일/로컬 저장 · 데이터 분리 · 도움말/업데이트 이력 -->
 <meta name="color-scheme" content="light dark">
 <style>
@@ -13,8 +15,10 @@
     /* 강조색 기본값 (teal) — [data-accent]로 덮어씀 */
     --accent:#0e6b73; --accent-deep:#0a5057; --accent-rgb:14,107,115;
   }
+  html{forced-color-adjust:none;}
   /* ── 라이트 모드 (기본) ── */
   :root,[data-theme="light"]{
+    color-scheme:light only;
     --bg:#f6f7f9; --paper:#ffffff; --ink:#1d2127; --ink-soft:#646b75; --ink-faint:#9aa0a8;
     --line:#e8eaed; --line-soft:#f1f2f4;
     --accent-soft:rgba(var(--accent-rgb),.12); --accent-tint:rgba(var(--accent-rgb),.06);
@@ -28,6 +32,7 @@
   }
   /* ── 다크 모드 ── */
   [data-theme="dark"]{
+    color-scheme:dark only;
     --bg:#16181c; --paper:#202329; --ink:#e8eaed; --ink-soft:#9aa1ac; --ink-faint:#6b7280;
     --line:#30343b; --line-soft:#272b31;
     --accent-soft:rgba(var(--accent-rgb),.22); --accent-tint:rgba(var(--accent-rgb),.12);
@@ -821,6 +826,52 @@
 @media (max-width:640px) {
     #supply-view .field.w-40{ flex:1 1 100%; }
 }
+  @media(max-width:700px){
+    /* 모바일 전용 — 데스크탑 기본값보다 뒤에 와야 우선 적용됨 */
+    .topbar{gap:6px;margin:0 0 8px;}
+    .brand{gap:6px;}
+    .brand .mark{width:26px;height:26px;}
+    .brand .mark svg{width:14px;height:14px;}
+    .brand h1{font-size:14px;}
+    .brand .sub{display:none;}
+    .top-right{gap:5px;margin-top:2px;}
+    .seg{padding:2px;}
+    .seg button{padding:7px 8px;font-size:0;gap:0;}
+    #report-btn,#leave-request-btn{font-size:0;padding:7px 8px;gap:0;}
+    .clock{display:none;}
+    #user-badge{font-size:10px;}
+    .icon-btn{width:30px;height:30px;}
+    .demo-role-switch{padding:2px;}
+    .demo-role-btn{font-size:11px;padding:6px 8px;}
+
+    .controls{gap:6px;margin-bottom:8px;flex-wrap:nowrap;}
+    .proj-bar{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;padding-bottom:1px;}
+    .proj-bar::-webkit-scrollbar{display:none;}
+    .proj-bar .chip{flex-shrink:0;}
+    .chip{font-size:11.5px;padding:6px 9px;}
+    .io-btns{flex-shrink:0;}
+    .io-btns button{font-size:0;padding:6px 8px;gap:0;}
+
+    .cal-head{padding:8px 10px;gap:6px;}
+    .cal-title{font-size:15px;}
+    .cal-body{padding:0 8px 12px;gap:5px;}
+    .week{gap:5px;}
+    .cell{padding:5px 6px;border-radius:8px;}
+    .cell .dnum{font-size:12.5px;}
+    .ebar{height:33px;line-height:1.25;font-size:11px;padding:3px 6px;border-radius:5px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;word-break:break-all;}
+    .ebar .bc{display:none;}
+    .hol-lbl{position:static;display:block;max-width:100%;margin:2px 0 0;padding:2px 4px;font-size:10px;line-height:1.35;}
+    .cal-title{gap:5px;}
+    .cal-title .mo{font-size:18px;}
+    .cal-actions{gap:5px;}
+    .cal-actions button{padding:6px 8px;font-size:0;gap:0;}
+    .cal-actions .btn-primary,.cal-actions button:nth-child(2){font-size:12.5px;gap:5px;padding:7px 12px;}
+    .cal-actions button:nth-child(1){display:none;}
+
+    .scrim{padding:14px 10px;}
+    .modal{border-radius:14px;}
+  }
+
 </style>
 
 <div class="photo-lightbox" id="photo-lightbox" onclick="closePhotoLightbox()"><img id="photo-lightbox-img" src=""></div>
@@ -1313,7 +1364,8 @@ const PRIO={high:{lbl:'높음',cls:'hi',rank:0},mid:{lbl:'중간',cls:'mid',rank
 const STATUS=[{id:'todo',lbl:'대기',color:'var(--st-todo)'},{id:'doing',lbl:'진행',color:'var(--st-doing)'},{id:'review',lbl:'검토',color:'var(--st-review)'},{id:'done',lbl:'완료',color:'var(--st-done)'}];
 const STMAP=Object.fromEntries(STATUS.map(s=>[s.id,s]));
 const WD=['일','월','화','수','목','금','토'];
-const MAXL=4, GAP=7, HEADER=26, BARH=22;
+const MAXL=4, GAP=7;
+function isMobileCal(){return window.innerWidth<=700;}
 /* ── 휴가 종류 ── bucket:'annual'은 연차에서 차감, 'other'는 별도 집계 ── */
 const DAILY_HOURS=8;
 const LEAVE_KINDS=[
@@ -2054,7 +2106,7 @@ function renderCal(){
       </div>
       <div class="cal-actions">
         <button class="cal-print" onclick="window.print()" title="이번 달 캘린더 인쇄 / PDF 저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>인쇄</button>
-        <button class="cal-print" onclick="saveCalImage()" title="캘린더를 이미지(PNG)로 저장 — 폰 사진처럼 한 장으로"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>이미지</button>
+        <button class="cal-print" onclick="viewOrSaveCalImage()" title="모바일: 화면에 크게 보기 · PC: 이미지(PNG)로 저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>이미지</button>
         <button class="cal-share" onclick="shareCalImage()" title="캘린더 이미지를 카톡·메시지 등으로 공유"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>공유</button>
         <button class="btn-primary" onclick="newEventToday()"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>새 일정</button>
       </div>
@@ -2063,6 +2115,7 @@ function renderCal(){
     <div class="cal-body">${weeksHtml}</div>`;
 }
 function renderWeek(weekStart,curMonth){
+  const HEADER=26, BARH=isMobileCal()?36:22;
   const wsNum=dayNum(ymd(weekStart)), weNum=wsNum+6;
   let segs=[];
   data.events.forEach(e=>{
@@ -2108,6 +2161,103 @@ function goToday(){view=new Date();renderCal();}
 /* ── 캘린더 이미지(PNG) 저장 / 공유 : 화면을 그대로 캔버스에 그림 (외부 라이브러리 없음) ── */
 function rrect(ctx,x,y,w,h,r){r=Math.max(0,Math.min(r,w/2,h/2));ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
 function fontOf(el,sizePx){const cs=getComputedStyle(el);return `${cs.fontStyle} ${cs.fontWeight} ${sizePx||parseFloat(cs.fontSize)+'px'} ${cs.fontFamily}`;}
+function buildCalCanvasWide(){
+  const y=view.getFullYear(), m=view.getMonth();
+  const firstDow=new Date(y,m,1).getDay();
+  let cursor=new Date(y,m,1); cursor.setDate(1-firstDow);
+  const lastDay=new Date(y,m+1,0);
+  const CELLW=176, GAP=8, HEADER=32, BARH=28, MAXLW=4;
+  const weeks=[];
+  while(cursor<=lastDay){
+    const weekStart=new Date(cursor);
+    const wsNum=dayNum(ymd(weekStart)), weNum=wsNum+6;
+    const segs=[];
+    data.events.forEach(e=>{
+      if(!passProj(e))return;
+      const s=dayNum(e.date), en=dayNum(dueOf(e));
+      if(en<wsNum||s>weNum)return;
+      segs.push({e,startCol:Math.max(0,s-wsNum),endCol:Math.min(6,en-wsNum),contL:s<wsNum,contR:en>weNum});
+    });
+    segs.sort((a,b)=>a.startCol-b.startCol||(b.endCol-b.startCol)-(a.endCol-a.startCol)||a.e.date.localeCompare(b.e.date));
+    const lanes=[];
+    segs.forEach(sg=>{let placed=false;for(let i=0;i<lanes.length;i++){if(lanes[i].every(o=>sg.endCol<o.s||sg.startCol>o.e)){lanes[i].push({s:sg.startCol,e:sg.endCol});sg.lane=i;placed=true;break;}}if(!placed){sg.lane=lanes.length;lanes.push([{s:sg.startCol,e:sg.endCol}]);}});
+    const shown=Math.min(lanes.length,MAXLW);
+    const h=Math.max(78,HEADER+shown*BARH+10);
+    const hidden=Array(7).fill(0);
+    segs.forEach(sg=>{if(sg.lane>=MAXLW)for(let c=sg.startCol;c<=sg.endCol;c++)hidden[c]++;});
+    weeks.push({weekStart,segs,hidden,h});
+    cursor.setDate(cursor.getDate()+7);
+  }
+  const PAD=22, TITLEH=44, WKH=32;
+  const totalW=CELLW*7+GAP*6;
+  const totalH=weeks.reduce((a,w)=>a+w.h+GAP,0)-GAP;
+  const scale=2;
+  const cv=document.createElement('canvas');
+  cv.width=Math.ceil((totalW+PAD*2)*scale);
+  cv.height=Math.ceil((totalH+PAD*2+TITLEH+WKH)*scale);
+  const ctx=cv.getContext('2d'); ctx.scale(scale,scale);
+  const FONT="'Pretendard','Malgun Gothic',sans-serif";
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,totalW+PAD*2,totalH+PAD*2+TITLEH+WKH);
+
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  ctx.fillStyle='#1a1a1a'; ctx.font=`700 26px ${FONT}`;
+  ctx.fillText(`${m+1}월`, PAD, PAD+27);
+  const moW=ctx.measureText(`${m+1}월`).width;
+  ctx.fillStyle='#9aa0a6'; ctx.font=`15px 'IBM Plex Mono',monospace`;
+  ctx.fillText(String(y), PAD+moW+9, PAD+27);
+
+  ctx.textAlign='center';
+  WD.forEach((w,i)=>{
+    const cx=PAD+i*(CELLW+GAP)+CELLW/2;
+    ctx.fillStyle= i===0?'#d2543a': i===6?'#0e6b73':'#666';
+    ctx.font=`600 13px ${FONT}`;
+    ctx.fillText(w, cx, PAD+TITLEH+21);
+  });
+
+  let y0=PAD+TITLEH+WKH;
+  weeks.forEach(wk=>{
+    for(let c=0;c<7;c++){
+      const d=new Date(wk.weekStart); d.setDate(wk.weekStart.getDate()+c);
+      const s=ymd(d), dow=d.getDay(), muted=d.getMonth()!==m, isToday=s===TODAY_STR;
+      const hol=HOLIDAYS[s];
+      const x=PAD+c*(CELLW+GAP), yy=y0;
+      ctx.fillStyle= isToday? '#e8f4f3':'#fbfbfc';
+      ctx.fillRect(x,yy,CELLW,wk.h);
+      ctx.strokeStyle='#e6e6e6'; ctx.lineWidth=1; ctx.strokeRect(x+.5,yy+.5,CELLW-1,wk.h-1);
+      ctx.textAlign='left';
+      ctx.fillStyle = muted? '#c7cbd1' : (hol||dow===0? '#d2543a' : dow===6? '#0e6b73' : '#1a1a1a');
+      ctx.font=`700 15px 'IBM Plex Mono',monospace`;
+      ctx.fillText(String(d.getDate()), x+10, yy+22);
+      if(hol){
+        ctx.font=`600 10px ${FONT}`;
+        const tw=ctx.measureText(hol).width;
+        ctx.fillStyle='#fbe9e6';
+        rrect(ctx,x+CELLW-tw-16,yy+8,tw+10,17,4); ctx.fill();
+        ctx.fillStyle='#c0392b';
+        ctx.fillText(hol, x+CELLW-tw-11, yy+19.5);
+      }
+      if(wk.hidden[c]>0){
+        ctx.fillStyle='#888'; ctx.font=`10px ${FONT}`; ctx.textAlign='right';
+        ctx.fillText(`+${wk.hidden[c]}개`, x+CELLW-8, yy+wk.h-8);
+        ctx.textAlign='left';
+      }
+    }
+    wk.segs.filter(sg=>sg.lane<MAXLW).forEach(sg=>{
+      const n=sg.endCol-sg.startCol+1;
+      const x=PAD+sg.startCol*(CELLW+GAP);
+      const w=CELLW*n+GAP*(n-1)-4;
+      const yb=y0+HEADER+sg.lane*BARH;
+      ctx.fillStyle=projColor(sg.e.projectId);
+      rrect(ctx,x+2,yb,w,BARH-6,5); ctx.fill();
+      ctx.fillStyle='#fff'; ctx.font=`600 13px ${FONT}`;
+      ctx.textAlign='left';
+      const label=(sg.contL&&sg.startCol===0?'‹ ':'')+(sg.e.title||'(제목 없음)')+(sg.contR?' ›':'');
+      ctx.fillText(label, x+11, yb+(BARH-6)/2+4.5, w-20);
+    });
+    y0+=wk.h+GAP;
+  });
+  return cv;
+}
 function buildCalCanvas(){
   const title=document.querySelector('.cal-title'), wkd=document.querySelector('.weekdays'), body=document.querySelector('.cal-body');
   if(!wkd||!body)return null;
@@ -2154,6 +2304,15 @@ function buildCalCanvas(){
   return cv;
 }
 function calImgName(){const mo=document.querySelector('.cal-title .mo'),yr=document.querySelector('.cal-title .yr');return `캘린더_${(yr?yr.textContent:'').trim()}_${(mo?mo.textContent:'').trim()}.png`.replace(/\s+/g,'');}
+function viewOrSaveCalImage(){
+  if(isMobileCal()){
+    if(viewMode!=='calendar'){alert('캘린더 화면에서 눌러주세요.');return;}
+    const cv=buildCalCanvasWide(); if(!cv){alert('이미지를 만들 수 없어요.');return;}
+    openPhotoLightbox(cv.toDataURL('image/png'));
+  }else{
+    saveCalImage();
+  }
+}
 function saveCalImage(){
   if(viewMode!=='calendar'){alert('캘린더 화면에서 눌러주세요.');return;}
   const cv=buildCalCanvas(); if(!cv){alert('이미지를 만들 수 없어요.');return;}
