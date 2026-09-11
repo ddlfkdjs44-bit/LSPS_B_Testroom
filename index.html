@@ -231,6 +231,7 @@
   .autonum-ico{font-family:var(--mono);font-weight:800;}
   .memo-saved{font-size:11.5px;color:var(--ink-faint);font-weight:600;transition:color .2s;}
   .memo-saved.saving{color:var(--accent);}
+  .memo-saved.save-error{color:#c0392b;cursor:pointer;text-decoration:underline;}
   .memo-pad{flex:1;width:100%;min-height:60vh;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:var(--shadow-sm);font-family:inherit;font-size:14px;line-height:1.75;color:var(--ink);padding:20px 22px;outline:none;resize:none;transition:border-color .15s;}
   .memo-pad:focus{border-color:var(--accent);}
   .memo-pad::placeholder{color:var(--ink-faint);}
@@ -605,6 +606,7 @@
 #wr-view .wr-head-actions{display:flex;align-items:center;gap:14px;}
 #wr-view .wr-saved{font-size:12.5px;font-weight:600;color:var(--ink-faint);}
 #wr-view .wr-saved.saving{color:var(--accent);}
+#wr-view .wr-saved.save-error{color:#c0392b;cursor:pointer;text-decoration:underline;}
 #wr-view .wr-export-btn{display:flex;align-items:center;gap:7px;padding:11px 20px;border-radius:10px;border:none;background:var(--accent);color:#fff;font-size:14.5px;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(var(--accent-rgb),.32);}
 #wr-view .wr-export-btn:hover{filter:brightness(1.08);}
 #wr-view .wr-export-btn svg{width:18px;height:18px;}
@@ -685,6 +687,8 @@
 #qc-view .meta-input:focus {border-bottom-color:var(--qc-accent);}
 #qc-view .meta-name {font-size:23px;font-weight:700;min-width:180px;}
 #qc-view .title-block .sub {font-size:13px;color:var(--qc-text-dim);margin-top:2px;}
+#qc-view #qc-save-status.saving{color:var(--qc-accent);}
+#qc-view #qc-save-status.save-error{color:#f0a493;cursor:pointer;text-decoration:underline;}
 #qc-view .stat-row {display:flex;gap:16px;align-items:center;}
 #qc-view .ring {position:relative;width:64px;height:64px;flex-shrink:0;}
 #qc-view .ring svg {transform:rotate(-90deg);width:64px;height:64px;}
@@ -1158,7 +1162,14 @@ async function afterLogin(){
   document.body.setAttribute('data-role',tier);
   document.getElementById('user-badge').textContent=`${profile.name} · ${profile.role}`;
   if(tier==='supplies')viewMode='supplies';
-  await Promise.all([loadProfilesMap(),loadAll(),loadLeaveRequests(),loadPendingSignups(),qcLoadData(),supplyLoadState(),wrInitLoad()]);
+  if(tier==='supplies'){
+    // 사무용품 계정은 발주 탭 외 데이터를 조회할 필요가 없음 — 불필요한 조회 최소화
+    await Promise.all([loadProfilesMap(),supplyLoadState()]);
+  }else{
+    const loaders=[loadProfilesMap(),loadAll(),loadLeaveRequests(),qcLoadData(),supplyLoadState(),wrInitLoad()];
+    if(isLeader())loaders.push(loadPendingSignups());
+    await Promise.all(loaders);
+  }
   renderAll();
   subscribeRealtime();
   checkShowAnnouncement();
@@ -1186,13 +1197,13 @@ async function loadAll(){
 }
 function subscribeRealtime(){
   sb.channel('schedule_data_ch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'schedule_data',filter:'id=eq.main'},payload=>{
-    if(Date.now()-lastSelfSaveAt<2500)return;
+    if(payload.new && payload.new.updated_by===profile.id)return; // 내가 방금 저장한 것의 에코만 무시 (시간 대신 작성자로 구분 — 비슷한 시각의 다른 사람 변경은 놓치지 않음)
     const incoming=payload.new.payload;
     if(openId){pendingRemoteSchedule=incoming;return;}
     data=incoming;migrate();renderAll();
   }).subscribe();
   sb.channel('memo_data_ch').on('postgres_changes',{event:'UPDATE',schema:'public',table:'memo_data',filter:'id=eq.main'},payload=>{
-    if(Date.now()-lastSelfMemoSaveAt<2500)return;
+    if(payload.new && payload.new.updated_by===profile.id)return;
     memoState=payload.new.payload||{memo:'',dateMemos:{},memoAutoNum:false};
     if(!memoState.dateMemos)memoState.dateMemos={};
     autoNum=!!memoState.memoAutoNum;
@@ -1209,7 +1220,7 @@ function subscribeRealtime(){
     }).subscribe();
   }
   sb.channel('qc_tracker_ch').on('postgres_changes',{event:'*',schema:'public',table:'qc_tracker_data'},payload=>{
-    if(Date.now()-lastSelfQcSaveAt<2000)return;
+    if(payload.eventType!=='DELETE' && payload.new && payload.new.updated_by===profile.id)return;
     const rowId=(payload.new&&payload.new.id)||(payload.old&&payload.old.id);
     if(payload.eventType==='DELETE'){
       qcProjects=qcProjects.filter(x=>x.id!==rowId);
@@ -1223,9 +1234,18 @@ function subscribeRealtime(){
     }
     if(viewMode==='qc')qcRenderProjectSelect();
   }).subscribe();
-  sb.channel('supply_items_ch').on('postgres_changes',{event:'*',schema:'public',table:'supply_items'},async()=>{
-    if(Date.now()-lastSelfSupplyChangeAt<2000)return;
+  sb.channel('supply_items_ch').on('postgres_changes',{event:'*',schema:'public',table:'supply_items'},async(payload)=>{
+    const changedBy=(payload.new&&payload.new.updated_by)||(payload.new&&payload.new.requester_id);
+    if(payload.eventType!=='DELETE' && changedBy===profile.id)return;
     if(viewMode==='supplies'){await supplyLoadState();supplyRenderList();}
+  }).subscribe();
+  sb.channel('weekly_reports_ch').on('postgres_changes',{event:'*',schema:'public',table:'weekly_reports'},async(payload)=>{
+    if(payload.new && payload.new.updated_by===profile.id)return;
+    const changedWeek=(payload.new&&payload.new.week_start)||(payload.old&&payload.old.week_start);
+    if(changedWeek!==wrWeekStart)return; // 지금 보고 있는 주가 아니면 무시
+    if(wrPendingSave || wrSaveT)return; // 내가 편집 중(저장 대기 중)이면 원격 변경으로 덮어쓰지 않음
+    await wrLoadReport(wrWeekStart);
+    if(viewMode==='wr')wrRenderShell();
   }).subscribe();
 }
 async function loadLeaveRequests(){
@@ -1561,13 +1581,14 @@ function migrate(){
 }
 let saveFlash=null;
 async function save(){
-  if(!isLeader())return; // 팀원은 캘린더 데이터를 저장할 수 없음 (서버 RLS로도 차단됨)
+  if(!isLeader())return false; // 팀원은 캘린더 데이터를 저장할 수 없음 (서버 RLS로도 차단됨)
   try{
     lastSelfSaveAt=Date.now();
     const {error}=await sb.from('schedule_data').update({payload:data,updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id','main');
     if(error)throw error;
     const el=document.getElementById('saving');el.classList.add('show');clearTimeout(saveFlash);saveFlash=setTimeout(()=>el.classList.remove('show'),1100);
-  }catch(e){console.error(e);alert('저장 중 오류가 발생했어요. 인터넷 연결을 확인해주세요.');}
+    return true;
+  }catch(e){console.error(e);alert('저장 중 오류가 발생했어요. 방금 한 변경사항이 서버에 반영되지 않았을 수 있어요. 인터넷 연결을 확인하고 다시 시도해주세요.');return false;}
 }
 
 const pad=n=>String(n).padStart(2,'0');
@@ -1854,16 +1875,40 @@ function pendingRequestsHtml(){
 }
 async function decideLeaveRequest(id,approve){
   const req=leaveRequests.find(r=>r.id===id);if(!req)return;
+  if(req.status!=='pending'){alert('이미 처리된 신청이에요.');await loadLeaveRequests();renderLeaveBellModal();return;}
+
+  const row=document.querySelector(`[data-lrid="${id}"]`);
+  const btns=row?row.querySelectorAll('button'):[];
+  btns.forEach(b=>b.disabled=true);
+
+  // 조건부 업데이트: 아직 pending일 때만 반영 — 동시 승인/중복 클릭에도 한 번만 적용되게 함
+  const {data:updatedRows,error}=await sb.from('leave_requests')
+    .update({status:approve?'approved':'rejected',decided_by:profile.id,decided_at:new Date().toISOString()})
+    .eq('id',id).eq('status','pending')
+    .select();
+  if(error){
+    alert('처리 중 오류가 발생했어요. 다시 시도해줘.');console.error(error);
+    btns.forEach(b=>b.disabled=false);
+    return;
+  }
+  if(!updatedRows||updatedRows.length===0){
+    alert('이미 다른 사람이 처리했거나 취소된 신청이에요. 목록을 새로고침할게.');
+    await loadLeaveRequests();renderLeaveBellModal();
+    return;
+  }
   if(approve){
     let p=data.projects.find(p=>/휴가/.test(p.name));
     if(!p){p={id:uid(),name:'휴가',color:'#c08418'};data.projects.push(p);}
     const name=(profilesMap[req.requester_id]||{}).name||'팀원';
     const lv=req.kind==='hour'?{kind:'hour',hours:req.hours||0}:{kind:req.kind,days:req.days!=null?req.days:(LK[req.kind]||LK.annual).def};
-    data.events.push({id:uid(),title:`${name} 휴가`,date:req.start_date,endDate:req.end_date,memo:req.memo||'',projectId:p.id,todos:[],leave:lv});
-    await save();
+    const newEvent={id:uid(),title:`${name} 휴가`,date:req.start_date,endDate:req.end_date,memo:req.memo||'',projectId:p.id,todos:[],leave:lv,leaveRequestId:id};
+    data.events.push(newEvent);
+    const ok=await save();
+    if(!ok){
+      data.events=data.events.filter(e=>e.id!==newEvent.id);
+      alert('휴가 신청 승인 처리는 완료됐지만, 캘린더 일정 반영에는 실패했어요. 잠시 후 새로고침해서 캘린더에 반영됐는지 확인해줘. 계속 안 보이면 관리자에게 알려줘.');
+    }
   }
-  const {error}=await sb.from('leave_requests').update({status:approve?'approved':'rejected',decided_by:profile.id,decided_at:new Date().toISOString()}).eq('id',id);
-  if(error){alert('처리 중 오류가 발생했어요.');console.error(error);return;}
   await loadLeaveRequests();
   renderLeaveBellModal();
   if(approve)refreshBg();
@@ -1922,7 +1967,7 @@ function renderLeaveBellModal(){
     const name=(profilesMap[r.requester_id]||{}).name||'알 수 없음';
     const amt=r.kind==='hour'?`${r.hours||0}시간`:`${r.days||0}일`;
     const range=r.start_date===r.end_date?r.start_date:`${r.start_date} → ${r.end_date}`;
-    return `<div class="lr-row">
+    return `<div class="lr-row" data-lrid="${r.id}">
       <div class="lr-info"><b>${esc(name)}</b> · ${leaveKindLbl(r.kind)} · ${amt} · ${range}${r.memo?`<div class="lr-memo">${esc(r.memo)}</div>`:''}</div>
       <div class="lr-actions"><button class="done-btn" onclick="decideLeaveRequest('${r.id}',true)">승인</button><button class="ghost" onclick="decideLeaveRequest('${r.id}',false)">거절</button></div>
     </div>`;}).join('');
@@ -2085,19 +2130,40 @@ function memoNumKey(e){
   ta.dispatchEvent(new Event('input'));
 }
 function memoSoftSave(){
-  const el=document.getElementById('memo-saved');if(el){el.textContent='저장 중…';el.classList.add('saving');}
+  const el=document.getElementById('memo-saved');if(el){el.textContent='저장 중…';el.classList.remove('save-error');el.classList.add('saving');el.onclick=null;}
   clearTimeout(memoSaveT);
   memoSaveT=setTimeout(async()=>{
-    try{lastSelfMemoSaveAt=Date.now();await sb.from('memo_data').update({payload:memoState,updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id','main');}catch(e){console.error(e);}
-    const e2=document.getElementById('memo-saved');if(e2){e2.textContent='저장됨';e2.classList.remove('saving');}
+    let ok=false;
+    try{
+      lastSelfMemoSaveAt=Date.now();
+      const {error}=await sb.from('memo_data').update({payload:memoState,updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id','main');
+      if(error)throw error;
+      ok=true;
+    }catch(e){console.error(e);}
+    const e2=document.getElementById('memo-saved');
+    if(e2){
+      e2.classList.remove('saving');
+      if(ok){e2.textContent='저장됨';e2.classList.remove('save-error');e2.onclick=null;}
+      else{e2.textContent='⚠ 저장 실패 · 클릭해서 재시도';e2.classList.add('save-error');e2.onclick=memoSoftSave;}
+    }
   },400);
 }
 function personalMemoSoftSave(){
-  const el=document.getElementById('memo-saved');if(el){el.textContent='저장 중…';el.classList.add('saving');}
+  const el=document.getElementById('memo-saved');if(el){el.textContent='저장 중…';el.classList.remove('save-error');el.classList.add('saving');el.onclick=null;}
   clearTimeout(personalMemoSaveT);
   personalMemoSaveT=setTimeout(async()=>{
-    try{await sb.from('personal_memos').upsert({id:profile.id,content:personalMemo,updated_at:new Date().toISOString()});}catch(e){console.error(e);}
-    const e2=document.getElementById('memo-saved');if(e2){e2.textContent='저장됨';e2.classList.remove('saving');}
+    let ok=false;
+    try{
+      const {error}=await sb.from('personal_memos').upsert({id:profile.id,content:personalMemo,updated_at:new Date().toISOString()});
+      if(error)throw error;
+      ok=true;
+    }catch(e){console.error(e);}
+    const e2=document.getElementById('memo-saved');
+    if(e2){
+      e2.classList.remove('saving');
+      if(ok){e2.textContent='저장됨';e2.classList.remove('save-error');e2.onclick=null;}
+      else{e2.textContent='⚠ 저장 실패 · 클릭해서 재시도';e2.classList.add('save-error');e2.onclick=personalMemoSoftSave;}
+    }
   },400);
 }
 function updMemo(v){if(memoMode==='team'){memoState.memo=v;memoSoftSave();}else{personalMemo=v;personalMemoSoftSave();}}
@@ -2695,12 +2761,19 @@ function qcApplyPayload(payload){
   qcProject=(payload&&payload.project)||{name:''};
 }
 async function qcLoadData(){
-  const {data:rows}=await sb.from('qc_tracker_data').select('id,payload').order('updated_at',{ascending:true});
+  const {data:rows,error}=await sb.from('qc_tracker_data').select('id,payload').order('updated_at',{ascending:true});
+  if(error){
+    console.error(error);
+    alert('시험관리 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침 해주세요. (안전을 위해 새 프로젝트를 만들지 않았어요)');
+    qcProjects=[]; qcActiveId=null; qcColumns=qcDefaultColumns(); qcUnits=[]; qcProject={name:''};
+    return;
+  }
   if(!rows||rows.length===0){
     qcActiveId='main';
     qcApplyPayload(null);
     qcProjects=[{id:'main',name:'(이름 없음)'}];
-    await sb.from('qc_tracker_data').insert({id:'main',payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
+    const {error:insErr}=await sb.from('qc_tracker_data').insert({id:'main',payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
+    if(insErr){console.error(insErr);alert('첫 프로젝트 생성 중 오류가 발생했어요. 새로고침 후 다시 시도해주세요.');}
     return;
   }
   qcProjects=rows.map(r=>({id:r.id,name:(r.payload&&r.payload.project&&r.payload.project.name)||'(이름 없음)'}));
@@ -2711,10 +2784,20 @@ async function qcLoadData(){
   qcApplyPayload(target.payload);
 }
 async function qcSave(){
+  const statusEl=document.getElementById('qc-save-status');
+  if(statusEl){statusEl.textContent='저장 중…';statusEl.classList.remove('save-error');statusEl.classList.add('saving');statusEl.onclick=null;}
   lastSelfQcSaveAt=Date.now();
-  await sb.from('qc_tracker_data').update({payload:{columns:qcColumns,units:qcUnits,project:qcProject},updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id',qcActiveId);
+  const {error}=await sb.from('qc_tracker_data').update({payload:{columns:qcColumns,units:qcUnits,project:qcProject},updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id',qcActiveId);
+  const s2=document.getElementById('qc-save-status');
+  if(error){
+    console.error(error);
+    if(s2){s2.classList.remove('saving');s2.textContent='⚠ 저장 실패 · 클릭해서 재시도';s2.classList.add('save-error');s2.onclick=qcSave;}
+    return false;
+  }
   const p=qcProjects.find(x=>x.id===qcActiveId);
   if(p)p.name=(qcProject.name&&qcProject.name.trim())||'(이름 없음)';
+  if(s2){s2.classList.remove('saving','save-error');s2.textContent='저장됨';s2.onclick=null;}
+  return true;
 }
 async function qcSwitchProject(id,skipSaveCurrent){
   if(id===qcActiveId||!id)return;
@@ -2800,14 +2883,25 @@ async function qcSaveAndReset(){
   if(qcUnits.length===0 && !qcProject.name.trim()){alert('저장할 내용이 없어.');return;}
   if(!confirm('현재 프로젝트를 완료 처리해서 "지난 기록"으로 옮길까? 활성 목록에서는 사라져.'))return;
   const label=qcProject.name.trim()||('프로젝트 '+new Date().toLocaleString('ko-KR'));
-  await sb.from('qc_tracker_archive').insert({name:label,payload:{columns:JSON.parse(JSON.stringify(qcColumns)),units:JSON.parse(JSON.stringify(qcUnits))}});
+  const {error:archErr}=await sb.from('qc_tracker_archive').insert({name:label,payload:{columns:JSON.parse(JSON.stringify(qcColumns)),units:JSON.parse(JSON.stringify(qcUnits))}});
+  if(archErr){
+    console.error(archErr);
+    alert('지난 기록으로 저장하는 중 오류가 발생했어요. 원본은 그대로 남아있으니 다시 시도해줘.');
+    return;
+  }
   const doneId=qcActiveId;
-  await sb.from('qc_tracker_data').delete().eq('id',doneId);
+  const {error:delErr}=await sb.from('qc_tracker_data').delete().eq('id',doneId);
+  if(delErr){
+    console.error(delErr);
+    alert('지난 기록 저장은 됐는데, 원래 프로젝트를 활성 목록에서 지우는 데 실패했어요. 목록에 중복으로 남아있을 수 있으니 새로고침 후 확인해줘.');
+    return;
+  }
   qcProjects=qcProjects.filter(p=>p.id!==doneId);
   if(qcProjects.length===0){
     const newId=uid();
     qcColumns=qcDefaultColumns();qcUnits=[];qcProject={name:''};
-    await sb.from('qc_tracker_data').insert({id:newId,payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
+    const {error:insErr}=await sb.from('qc_tracker_data').insert({id:newId,payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
+    if(insErr){console.error(insErr);alert('새 프로젝트 생성 중 오류가 발생했어요. 새로고침 후 "+ 새 프로젝트"로 다시 만들어줘.');return;}
     qcActiveId=newId;
     qcProjects=[{id:newId,name:'(이름 없음)'}];
     try{localStorage.setItem('qc-active-project-id',newId);}catch(e){}
@@ -2843,7 +2937,7 @@ function qcRenderShell(){
           <button class="danger" id="qcBtnDelProject" title="현재 프로젝트를 목록에서 삭제">🗑</button>
         </div>
         <div class="meta-row"><input type="text" id="qcProjName" class="meta-input meta-name" placeholder="프로젝트명"></div>
-        <div class="sub">호기별 시험 항목 완료 체크 · 클릭으로 상태 전환 · 자동 저장 · 팀 전체 공유</div>
+        <div class="sub">호기별 시험 항목 완료 체크 · 클릭으로 상태 전환 · 자동 저장 · 팀 전체 공유 · <span id="qc-save-status" style="font-weight:600;">저장됨</span></div>
       </div>
       <div class="stat-row">
         <div class="ring"><svg viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="24"></circle><circle class="fg" id="qcRingFg" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle></svg><div class="pct" id="qcRingPct">0%</div></div>
@@ -3213,20 +3307,41 @@ async function supplyInsertItem(item){
   return !error;
 }
 async function supplyUpdateItemField(id,field,value){
-  lastSelfSupplyChangeAt=Date.now();
   const col=field==='unitPrice'?'unit_price':field;
   const val=(field==='unitPrice'||field==='qty')?(Number(value)||0):value;
-  await sb.from('supply_items').update({[col]:val}).eq('id',id);
+  const {error}=await sb.from('supply_items').update({[col]:val,updated_by:profile.id}).eq('id',id);
+  if(error){
+    console.error(error);
+    alert('저장에 실패했어요. 방금 수정한 값이 실제로는 반영되지 않았을 수 있어요. 목록을 새로고침할게.');
+    await supplyLoadState();supplyRenderList();
+    return false;
+  }
+  return true;
 }
-async function supplyDeleteItem(id){lastSelfSupplyChangeAt=Date.now();await sb.from('supply_items').delete().eq('id',id);}
-async function supplyClearAllItems(){lastSelfSupplyChangeAt=Date.now();await sb.from('supply_items').delete().eq('ym',supplyState.ym);}
+async function supplyDeleteItem(id){
+  const {error}=await sb.from('supply_items').delete().eq('id',id);
+  if(error){console.error(error);alert('삭제에 실패했어요. 다시 시도해줘.');return false;}
+  return true;
+}
+async function supplyClearAllItems(){
+  const {error}=await sb.from('supply_items').delete().eq('ym',supplyState.ym);
+  if(error){console.error(error);alert('전체 삭제에 실패했어요. 다시 시도해줘.');return false;}
+  return true;
+}
 async function supplyMoveItemToYm(id,newYm){
-  lastSelfSupplyChangeAt=Date.now();
-  await sb.from('supply_items').update({ym:newYm}).eq('id',id);
+  const {error}=await sb.from('supply_items').update({ym:newYm,updated_by:profile.id}).eq('id',id);
+  if(error){console.error(error);alert('다음 달로 이동하는 데 실패했어요. 다시 시도해줘.');return false;}
+  return true;
 }
 async function supplyUpdatePriority(id,priority){
-  lastSelfSupplyChangeAt=Date.now();
-  await sb.from('supply_items').update({priority}).eq('id',id);
+  const {error}=await sb.from('supply_items').update({priority,updated_by:profile.id}).eq('id',id);
+  if(error){
+    console.error(error);
+    alert('우선순위 변경에 실패했어요. 목록을 새로고침할게.');
+    await supplyLoadState();supplyRenderList();
+    return false;
+  }
+  return true;
 }
 function supplyShowToast(msg){
   const t=document.getElementById('sp-toast');if(!t)return;
@@ -3456,7 +3571,8 @@ function supplyAttachListEvents(){
   box.querySelectorAll('[data-del]').forEach(btn=>{
     btn.addEventListener('click',async()=>{
       const id=btn.dataset.del;
-      await supplyDeleteItem(id);
+      const ok=await supplyDeleteItem(id);
+      if(!ok)return; // 실패 시 목록에서 지우지 않음 (성공한 것처럼 보이지 않게)
       supplyState.items=supplyState.items.filter(it=>it.id!==id);
       supplyRenderList();
     });
@@ -3476,7 +3592,8 @@ function supplyAttachListEvents(){
   const clearBtn=document.getElementById('sp-clear-all-btn');
   if(clearBtn)clearBtn.addEventListener('click',async()=>{
     if(!confirm(supplyYmLabel(supplyState.ym)+' 목록 '+supplyState.items.length+'건을 모두 삭제하시겠습니까? 삭제 후 복구할 수 없습니다.'))return;
-    await supplyClearAllItems();
+    const ok=await supplyClearAllItems();
+    if(!ok)return; // 실패 시 목록을 비우지 않음
     supplyState.items=[];
     supplyRenderList();
   });
@@ -3516,6 +3633,7 @@ function supplyAttachListEvents(){
 
 /* ═══════════ 주간업무보고 ═══════════ */
 let wrWeekStart='', wrReport=null, wrSaveT=null, lastSelfWrSaveAt=0;
+let wrPendingSave=null, wrLoadToken=0;
 
 function wrMonday(dateStr){
   const d=new Date(dateStr+'T00:00:00');
@@ -3548,33 +3666,66 @@ function wrDefaultReport(monday){
 }
 async function wrInitLoad(){
   wrWeekStart=wrMonday(TODAY_STR);
-  await wrLoadReport();
+  await wrLoadReport(wrWeekStart);
 }
-async function wrLoadReport(){
-  const {data:row}=await sb.from('weekly_reports').select('payload').eq('week_start',wrWeekStart).maybeSingle();
-  wrReport=(row&&row.payload&&Object.keys(row.payload).length)?row.payload:wrDefaultReport(wrWeekStart);
+async function wrLoadReport(weekStart){
+  const myToken=++wrLoadToken;
+  const {data:row,error}=await sb.from('weekly_reports').select('payload').eq('week_start',weekStart).maybeSingle();
+  if(myToken!==wrLoadToken)return; // 그 사이에 더 최신 주 이동 요청이 있었으면 이 응답은 버림 (뒤늦게 도착한 응답이 화면을 덮지 않게)
+  if(error){
+    console.error(error);
+    alert('주간보고를 불러오지 못했어요. 인터넷 연결을 확인하고 다시 시도해줘.');
+    wrReport=wrDefaultReport(weekStart);
+    return;
+  }
+  wrReport=(row&&row.payload&&Object.keys(row.payload).length)?row.payload:wrDefaultReport(weekStart);
   if(!wrReport.etc)wrReport.etc=[''];
 }
-async function wrSave(){
+async function wrSave(weekStart,reportSnapshot){
+  const {error}=await sb.from('weekly_reports').upsert({week_start:weekStart,payload:reportSnapshot,updated_by:profile.id,updated_at:new Date().toISOString()});
+  if(error){console.error(error);return false;}
   lastSelfWrSaveAt=Date.now();
-  await sb.from('weekly_reports').upsert({week_start:wrWeekStart,payload:wrReport,updated_by:profile.id,updated_at:new Date().toISOString()});
+  return true;
 }
 function wrSoftSave(){
-  const el=document.getElementById('wr-saved');if(el){el.textContent='저장 중…';el.classList.add('saving');}
+  const el=document.getElementById('wr-saved');if(el){el.textContent='저장 중…';el.classList.remove('save-error');el.classList.add('saving');el.onclick=null;}
   clearTimeout(wrSaveT);
+  const weekStartSnap=wrWeekStart;
+  const reportSnap=JSON.parse(JSON.stringify(wrReport));
+  wrPendingSave={weekStart:weekStartSnap,report:reportSnap};
   wrSaveT=setTimeout(async()=>{
-    await wrSave();
-    const e2=document.getElementById('wr-saved');if(e2){e2.textContent='저장됨';e2.classList.remove('saving');}
+    wrSaveT=null;
+    const ok=await wrSave(weekStartSnap,reportSnap);
+    if(wrPendingSave && wrPendingSave.weekStart===weekStartSnap && !wrSaveT) wrPendingSave=null;
+    const e2=document.getElementById('wr-saved');
+    if(e2){
+      e2.classList.remove('saving');
+      if(ok){e2.textContent='저장됨';e2.classList.remove('save-error');e2.onclick=null;}
+      else{e2.textContent='⚠ 저장 실패 · 클릭해서 재시도';e2.classList.add('save-error');e2.onclick=wrSoftSave;}
+    }
   },500);
 }
+async function wrFlushPendingSave(){
+  if(wrSaveT){clearTimeout(wrSaveT);wrSaveT=null;}
+  if(!wrPendingSave)return true;
+  const {weekStart,report}=wrPendingSave;
+  wrPendingSave=null;
+  const ok=await wrSave(weekStart,report);
+  if(!ok)wrPendingSave={weekStart,report};
+  return ok;
+}
 async function wrSwitchWeek(delta){
+  const ok=await wrFlushPendingSave();
+  if(!ok && !confirm('방금 입력한 내용을 저장하지 못했어요. 그래도 다른 주로 이동할까요? (지금 입력한 내용은 저장 안 돼요)'))return;
   wrWeekStart=wrAddDays(wrWeekStart,delta*7);
-  await wrLoadReport();
+  await wrLoadReport(wrWeekStart);
   wrRenderShell();
 }
 async function wrGoThisWeek(){
+  const ok=await wrFlushPendingSave();
+  if(!ok && !confirm('방금 입력한 내용을 저장하지 못했어요. 그래도 이번 주로 이동할까요? (지금 입력한 내용은 저장 안 돼요)'))return;
   wrWeekStart=wrMonday(TODAY_STR);
-  await wrLoadReport();
+  await wrLoadReport(wrWeekStart);
   wrRenderShell();
 }
 function wrSectionArr(section){ return section==='this'?wrReport.thisGroups:wrReport.nextGroups; }
@@ -3710,8 +3861,10 @@ async function wrDoSearch(){
   resultsEl.innerHTML=matches.map(m=>`<div class="wr-search-item" onclick="wrJumpToWeek('${m.weekStart}')"><b>${esc(m.label)}</b>${m.snippet?`<div class="wr-search-snippet">${esc(m.snippet)}</div>`:''}</div>`).join('');
 }
 async function wrJumpToWeek(weekStart){
+  const ok=await wrFlushPendingSave();
+  if(!ok && !confirm('방금 입력한 내용을 저장하지 못했어요. 그래도 이동할까요? (지금 입력한 내용은 저장 안 돼요)'))return;
   wrWeekStart=weekStart;
-  await wrLoadReport();
+  await wrLoadReport(weekStart);
   wrCloseSearch();
   wrRenderShell();
 }
