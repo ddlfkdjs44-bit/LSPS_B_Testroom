@@ -104,7 +104,7 @@
   body[data-role="member"] #imp-wrap,body[data-role="member"] .btn-primary,
   body[data-role="member"] .proj-bar .chip.add,body[data-role="member"] .proj-bar .edit{display:none !important;}
   body[data-role="supplies"] #vt-cal,body[data-role="supplies"] #vt-assign,body[data-role="supplies"] #vt-note,
-  body[data-role="supplies"] #vt-qc,body[data-role="supplies"] #vt-wr,body[data-role="supplies"] #leave-bell-btn,body[data-role="supplies"] #signup-bell-btn,
+  body[data-role="supplies"] #vt-misc,body[data-role="supplies"] #vt-wr,body[data-role="supplies"] #leave-bell-btn,body[data-role="supplies"] #signup-bell-btn,
   body[data-role="supplies"] #leave-request-btn,body[data-role="supplies"] .controls{display:none !important;}
   body[data-role="leader"] #leave-request-btn{display:none !important;}
   body[data-role="member"] .ti .box{pointer-events:none;opacity:.5;}
@@ -350,6 +350,45 @@
   .as-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
   .as-name{font-size:13px;font-weight:600;flex:1;}
   .as-nums{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .as-done-link{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--accent-deep);cursor:pointer;padding:3px 0 0;user-select:none;transition:color .15s;}
+  .as-done-link:hover{color:var(--accent);}
+  .as-done-link .arr{transition:transform .15s;} .as-done-link:hover .arr{transform:translateX(2px);}
+  .adone-list{display:flex;flex-direction:column;gap:9px;}
+  .adone-item{border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:var(--cell-bg);}
+  .adone-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;}
+  .adone-who{font-size:12.5px;font-weight:700;}
+  .adone-when{font-family:var(--mono);font-size:11px;color:var(--ink-faint);margin-left:auto;}
+  .adone-text{font-size:13px;line-height:1.45;color:var(--ink);}
+
+  /* ── 기타 기능 탭 (ITP 번호대장 등) ── */
+  .misc-wrap{display:flex;min-height:480px;}
+  .misc-side{width:200px;flex-shrink:0;border-right:1px solid var(--line-soft);padding:16px 10px;display:flex;flex-direction:column;gap:3px;align-self:stretch;}
+  .misc-side-title{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase;padding:4px 10px 10px;}
+  .misc-side-item{display:flex;align-items:center;gap:8px;text-align:left;border:none;background:transparent;border-radius:9px;padding:10px 11px;font-family:inherit;font-size:13.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;transition:all .15s;}
+  .misc-side-item:hover{background:var(--cell-bg);color:var(--ink);}
+  .misc-side-item.active{background:var(--accent-tint);color:var(--accent-deep);}
+  .misc-main{flex:1;min-width:0;overflow-y:auto;padding:26px 28px;}
+  .itp-head{margin-bottom:4px;font-size:19px;font-weight:800;color:var(--ink);}
+  .itp-sub{font-size:12.5px;color:var(--ink-soft);margin-bottom:18px;}
+  .itp-issue-card{background:var(--cell-bg);border:1px solid var(--line-soft);border-radius:var(--r);padding:16px 18px;margin-bottom:22px;}
+  .itp-issue-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+  .itp-select,.itp-input{border:1px solid var(--line);border-radius:9px;background:var(--paper);font-family:inherit;font-size:13.5px;color:var(--ink);padding:9px 11px;outline:none;transition:border-color .15s;}
+  .itp-select:focus,.itp-input:focus{border-color:var(--accent);}
+  .itp-input{flex:1;min-width:140px;}
+  .itp-btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
+  .itp-btn:hover{background:var(--accent-deep);}
+  .itp-btn:disabled{opacity:.55;cursor:default;}
+  .itp-preview{font-family:var(--mono);font-size:13px;color:var(--accent-deep);font-weight:700;}
+  .itp-list-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .itp-list-head h3{font-size:14px;font-weight:700;color:var(--ink);}
+  .itp-count{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
+  .itp-list{display:flex;flex-direction:column;gap:7px;}
+  .itp-row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:10px;padding:10px 13px;background:var(--paper);}
+  .itp-no{font-family:var(--mono);font-size:13.5px;font-weight:800;color:var(--ink);min-width:150px;}
+  .itp-meta{flex:1;min-width:0;font-size:12.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .itp-who-when{font-family:var(--mono);font-size:11px;color:var(--ink-faint);white-space:nowrap;}
+  .itp-del{width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;background:var(--line-soft);color:var(--ink-faint);flex-shrink:0;transition:all .15s;}
+  .itp-del:hover{background:var(--hi);color:#fff;}
 
   /* ── modal ── */
   .scrim{position:fixed;inset:0;background:rgba(24,28,32,.46);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:44px 18px;z-index:50;overflow-y:auto;}
@@ -609,7 +648,6 @@
     .bar{box-shadow:none!important;}
   }
 
-  /* ══════ 시험 진행 관리(QC 트래커) 탭 — 원본 다크 테마를 #qc-view 안에 스코핑 ══════ */
 
 /* ══════ 주간업무보고 탭 ══════ */
 #wr-view{padding:24px;background:var(--bg);}
@@ -681,144 +719,6 @@
 #wr-view .wr-search-item b{font-size:14px;color:var(--accent-deep);}
 #wr-view .wr-search-snippet{font-size:12.5px;color:var(--ink-soft);margin-top:4px;line-height:1.5;}
 
-#qc-view {
-    --qc-bg:#232c3a;
-    --qc-panel:#2b3548;
-    --qc-panel-2:#333f55;
-    --qc-border:#4a5872;
-    --qc-text:#f2f4f8;
-    --qc-text-dim:#b3bccd;
-    --qc-accent:#4ecdc2;
-    --qc-accent-dim:#3a6b66;
-    --qc-ok:#43d68a;
-    --qc-ok-dim:#1f4a35;
-    --qc-type:#f0bb52;
-    --qc-pending:#414f68;
-  }
-#qc-view * {box-sizing:border-box;}
-#qc-view {margin:0;background:var(--qc-bg);color:var(--qc-text);font-family:'IBM Plex Sans KR', sans-serif;-webkit-font-smoothing:antialiased;border-radius:var(--r-sm);padding:16px;color-scheme:dark only;forced-color-adjust:none;}
-#qc-view * {color-scheme:dark only;forced-color-adjust:none;}
-#qc-view .wrap {max-width:1440px;margin:0 auto;padding:28px 20px 60px;}
-#qc-view header {display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:18px;}
-#qc-view .title-block {min-width:280px;}
-#qc-view .qc-project-switch {display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;}
-#qc-view .qc-project-switch select {min-width:160px;font-weight:600;}
-#qc-view .meta-row {display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:6px;}
-#qc-view .meta-input {background:transparent;border:none;border-bottom:1px dashed var(--qc-border);color:var(--qc-text) !important;font-family:inherit;outline:none;padding:3px 1px;}
-#qc-view .meta-input::placeholder {color:#8894aa !important;opacity:1 !important;}
-#qc-view .meta-input:focus {border-bottom-color:var(--qc-accent);}
-#qc-view .meta-name {font-size:23px;font-weight:700;min-width:180px;}
-#qc-view .title-block .sub {font-size:13px;color:var(--qc-text-dim);margin-top:2px;}
-#qc-view #qc-save-status.saving{color:var(--qc-accent);}
-#qc-view #qc-save-status.save-error{color:#f0a493;cursor:pointer;text-decoration:underline;}
-#qc-view .stat-row {display:flex;gap:16px;align-items:center;}
-#qc-view .ring {position:relative;width:64px;height:64px;flex-shrink:0;}
-#qc-view .ring svg {transform:rotate(-90deg);width:64px;height:64px;}
-#qc-view .ring circle {fill:none;stroke-width:6;}
-#qc-view .ring .bg {stroke:var(--qc-panel-2);}
-#qc-view .ring .fg {stroke:var(--qc-accent);stroke-linecap:round;transition:stroke-dashoffset .3s;}
-#qc-view .ring .pct {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono';font-size:13.5px;font-weight:600;}
-#qc-view .stat-nums {font-family:'IBM Plex Mono';font-size:14px;color:var(--qc-text-dim);line-height:1.6;}
-#qc-view .stat-nums b {color:var(--qc-text);font-weight:600;}
-#qc-view .toolbar {display:flex;flex-wrap:wrap;gap:9px;align-items:center;background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
-#qc-view .toolbar .grp {display:flex;gap:7px;align-items:center;padding-right:11px;border-right:1px solid var(--qc-border);}
-#qc-view .toolbar .grp:last-child {border-right:none;padding-right:0;}
-#qc-view input[type=text], #qc-view input[type=number] {background:var(--qc-panel-2) !important;border:1px solid var(--qc-border);color:var(--qc-text) !important;border-radius:6px;padding:8px 11px;font-family:inherit;font-size:14px;outline:none;}
-#qc-view input[type=text]::placeholder, #qc-view input[type=number]::placeholder {color:#8894aa !important;opacity:1 !important;}
-#qc-view input[type=text]:focus, #qc-view input[type=number]:focus {border-color:var(--qc-accent);}
-#qc-view input[type=number] {width:68px;}
-#qc-view select {background:var(--qc-panel-2) !important;border:1px solid var(--qc-border);color:var(--qc-text) !important;border-radius:6px;padding:8px 10px;font-family:inherit;font-size:14px;outline:none;}
-#qc-view select option {background:var(--qc-panel-2);color:var(--qc-text);}
-#qc-view button {background:var(--qc-panel-2);border:1px solid var(--qc-border);color:var(--qc-text);border-radius:6px;padding:8px 13px;font-family:inherit;font-size:13.5px;cursor:pointer;transition:background .15s, border-color .15s;}
-#qc-view button:hover {background:#3a465c;border-color:#5a6b88;}
-#qc-view button.primary {background:var(--qc-accent-dim);border-color:var(--qc-accent);color:#bdf3ee;}
-#qc-view button.primary:hover {background:#2f6a63;}
-#qc-view button.danger {color:#f0a493;}
-#qc-view button.danger:hover {border-color:#c04b30;}
-#qc-view button.tab {background:transparent;border-color:transparent;color:var(--qc-text-dim);}
-#qc-view button.tab.active {background:var(--qc-panel-2);border-color:var(--qc-border);color:var(--qc-text);}
-#qc-view .panel {display:none;margin-bottom:14px;background:var(--qc-panel);border:1px solid var(--qc-border);border-radius:10px;padding:14px;}
-#qc-view .panel.open {display:block;}
-#qc-view .panel textarea {width:100%;min-height:100px;background:var(--qc-panel-2) !important;border:1px solid var(--qc-border);color:var(--qc-text) !important;border-radius:6px;padding:10px;font-family:'IBM Plex Mono';font-size:13.5px;resize:vertical;outline:none;}
-#qc-view .panel .hint {font-size:12.5px;color:var(--qc-text-dim);margin:0 0 9px;}
-#qc-view .panel .actions {display:flex;gap:8px;justify-content:flex-end;margin-top:9px;}
-#qc-view .col-list {display:flex;flex-direction:column;gap:7px;max-height:280px;overflow:auto;margin-bottom:11px;}
-#qc-view .col-row {display:flex;gap:9px;align-items:center;background:var(--qc-panel-2);border:1px solid var(--qc-border);border-radius:6px;padding:7px 9px;transition:opacity .15s, border-color .15s;}
-#qc-view .col-row.dragging {opacity:.35;}
-#qc-view .col-row.drag-over-top {box-shadow:inset 0 2px 0 var(--qc-accent);}
-#qc-view .col-row.drag-over-bottom {box-shadow:inset 0 -2px 0 var(--qc-accent);}
-#qc-view .col-row .handle {cursor:grab;color:var(--qc-text-dim);font-size:14px;letter-spacing:-1px;flex-shrink:0;user-select:none;}
-#qc-view .col-row .handle:active {cursor:grabbing;}
-#qc-view .col-row .move-btns {display:flex;flex-direction:column;gap:0;flex-shrink:0;}
-#qc-view .col-row .move-btn {cursor:pointer;color:var(--qc-text-dim);font-size:10px;line-height:1;padding:1px 3px;}
-#qc-view .col-row .move-btn:hover {color:var(--qc-accent);}
-#qc-view .col-row .move-btn.disabled {opacity:.2;pointer-events:none;}
-#qc-view .col-row input[type=text] {flex:1;background:transparent !important;border:none;color:var(--qc-text) !important;font-size:14px;padding:3px;}
-#qc-view .col-row .tag-dot {width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-#qc-view .col-row .tag-dot.routine {background:var(--qc-accent);}
-#qc-view .col-row .tag-dot.type {background:var(--qc-type);}
-#qc-view .col-row .del {color:var(--qc-text-dim);cursor:pointer;font-size:16px;padding:0 5px;}
-#qc-view .col-row .del:hover {color:#f0a493;}
-#qc-view .col-add {display:flex;gap:9px;align-items:center;border-top:1px solid var(--qc-border);padding-top:11px;}
-#qc-view .col-add input[type=text] {flex:1;}
-#qc-view .arc-row {display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--qc-panel-2);border:1px solid var(--qc-border);border-radius:6px;padding:9px 11px;}
-#qc-view .arc-name {font-weight:600;font-size:14.5px;}
-#qc-view .arc-meta {font-size:12.5px;color:var(--qc-text-dim);margin-top:2px;}
-#qc-view .arc-actions {display:flex;gap:6px;flex-shrink:0;}
-#qc-view .table-scroll {overflow:auto;border:1px solid var(--qc-border);border-radius:10px;background:var(--qc-panel);max-height:70vh;}
-#qc-view table {border-collapse:separate;border-spacing:0;font-size:14.5px;}
-#qc-view th, #qc-view td {border-bottom:1px solid var(--qc-border);border-right:1px solid var(--qc-border);white-space:nowrap;}
-#qc-view thead th {position:sticky;top:0;background:var(--qc-panel-2);z-index:3;padding:0;font-weight:600;}
-#qc-view thead th.colname {padding:12px 14px;position:relative;text-align:center;}
-#qc-view thead th.colname::before {content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--qc-accent);}
-#qc-view thead th.colname.type::before {background:var(--qc-type);}
-#qc-view thead th.colname .lbl {display:inline-block;white-space:nowrap;font-size:13.5px;color:var(--qc-text-dim);font-weight:600;}
-#qc-view thead th.corner {position:sticky;top:0;z-index:5;background:var(--qc-panel-2);}
-#qc-view thead th.corner-no {left:0;width:74px;min-width:74px;text-align:center;}
-#qc-view thead th.corner-cap {left:74px;min-width:130px;text-align:left;padding-left:12px;}
-#qc-view thead th.progresshead {position:sticky;top:0;z-index:3;background:var(--qc-panel-2);min-width:72px;font-size:12.5px;color:var(--qc-text-dim);font-weight:500;}
-#qc-view tbody th.rowno {position:sticky;left:0;background:var(--qc-panel);z-index:2;text-align:center;font-family:'IBM Plex Mono';font-size:14px;color:var(--qc-text-dim);width:74px;min-width:74px;padding:0;}
-#qc-view tbody th.rowno input {background:transparent !important;border:none;color:var(--qc-text) !important;font-family:'IBM Plex Mono';font-size:14.5px;font-weight:600;width:100%;text-align:center;padding:11px 2px;outline:none;}
-#qc-view tbody th.rowno input:focus {color:var(--qc-accent) !important;}
-#qc-view tbody th.rowname {position:sticky;left:74px;background:var(--qc-panel);z-index:2;text-align:left;padding:0 12px;font-family:'IBM Plex Mono';font-size:14px;font-weight:500;min-width:170px;max-width:240px;overflow:hidden;text-overflow:ellipsis;}
-#qc-view tbody tr:hover th.rowno, #qc-view tbody tr:hover th.rowname, #qc-view tbody tr:hover td {background:#3a465c;}
-#qc-view tbody th.rowname .row-inner {display:flex;align-items:center;justify-content:space-between;gap:6px;}
-#qc-view tbody th.rowname .del {opacity:0;color:var(--qc-text-dim);font-size:15px;cursor:pointer;padding:2px 5px;line-height:1;}
-#qc-view tbody tr:hover th.rowname .del {opacity:1;}
-#qc-view tbody th.rowname .del:hover {color:#f0a493;}
-#qc-view tbody th.rowname input {background:transparent !important;border:none;color:var(--qc-text) !important;font-family:'IBM Plex Mono';font-size:14px;width:100%;padding:11px 0;outline:none;}
-#qc-view tbody th.rowname input:focus {color:var(--qc-accent) !important;}
-#qc-view td.qccell {min-width:64px;height:52px;text-align:center;cursor:pointer;padding:0 8px;user-select:none;background:var(--qc-panel) !important;position:relative;}
-#qc-view .note-mark {position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 11px 11px 0;border-color:transparent rgba(78,205,194,.22) transparent transparent;cursor:pointer;transition:border-color .15s;}
-#qc-view td.qccell:hover .note-mark {border-color:transparent rgba(78,205,194,.8) transparent transparent;}
-#qc-view .note-mark.has-note {border-color:transparent #f0bb52 transparent transparent !important;}
-#qc-view td.qccell.typecol {background:rgba(240,187,82,.07);}
-#qc-view td.qccell .dot {width:26px;height:26px;border-radius:6px;margin:0 auto;background:var(--qc-pending) !important;border:1px solid #5a6883;transition:transform .1s;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;line-height:1;color:var(--qc-text);}
-#qc-view td.qccell:active .dot {transform:scale(.85);}
-#qc-view td.qccell.done .dot {background:var(--qc-ok) !important;border-color:var(--qc-ok) !important;color:#0e2417;}
-#qc-view td.qccell.exempt .dot {background:transparent !important;border:1px dashed var(--qc-type);color:var(--qc-type) !important;}
-#qc-view td.progress {background:var(--qc-panel);font-family:'IBM Plex Mono';font-size:12.5px;color:var(--qc-text-dim);text-align:center;min-width:70px;}
-#qc-view tbody tr.complete th.rowname {box-shadow:inset 3px 0 0 var(--qc-ok);}
-#qc-view tbody tr:hover td.progress {background:#3a465c;}
-#qc-view tfoot th, #qc-view tfoot td {position:sticky;bottom:0;background:var(--qc-panel-2);z-index:2;border-top:1px solid var(--qc-border);border-bottom:none;}
-#qc-view tfoot th.corner {left:0;z-index:4;text-align:left;padding:9px 11px;font-size:12px;color:var(--qc-text-dim);}
-#qc-view tfoot td.colsum {text-align:center;font-family:'IBM Plex Mono';font-size:12px;color:var(--qc-text-dim);padding:7px 2px;}
-#qc-view tfoot td.colsum.full {color:var(--qc-ok);}
-#qc-view .legend {display:flex;gap:18px;align-items:center;margin-top:13px;font-size:12.5px;color:var(--qc-text-dim);flex-wrap:wrap;}
-#qc-view .legend .item {display:flex;align-items:center;gap:7px;}
-#qc-view .legend .sw {width:15px;height:15px;border-radius:3px;border:1px solid #5a6883;}
-#qc-view .legend .sw.pending {background:var(--qc-pending);}
-#qc-view .legend .sw.done {background:var(--qc-ok);border-color:var(--qc-ok);}
-#qc-view .legend .sw.exempt {background:transparent;border:1px dashed var(--qc-type);color:var(--qc-type);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
-#qc-view .legend .sw.dot {border-radius:50%;border:none;width:10px;height:10px;}
-#qc-view .legend .sw.dot.routine {background:var(--qc-accent);}
-#qc-view .legend .sw.dot.type {background:var(--qc-type);}
-#qc-view .empty-msg {padding:44px;text-align:center;color:var(--qc-text-dim);font-size:14.5px;}
-#qc-view ::-webkit-scrollbar {height:10px;width:10px;}
-#qc-view ::-webkit-scrollbar {height:10px;width:10px;}
-#qc-view ::-webkit-scrollbar-track {background:var(--qc-panel);}
-#qc-view ::-webkit-scrollbar-thumb {background:#4a5872;border-radius:5px;}
-#qc-view ::-webkit-scrollbar-thumb:hover {background:#5a6b88;}
 
   /* ══════ 사무용품 발주 탭 — 원본 amber 테마를 #supply-view 안에 스코핑 ══════ */
 #supply-view {
@@ -1009,7 +909,7 @@
         <button id="vt-cal" class="on" onclick="setView('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>캘린더</button>
         <button id="vt-assign" onclick="setView('assign')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>업무분장</button>
         <button id="vt-note" onclick="setView('note')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M15 3v4h4M8 11h8M8 15h6"/></svg>메모</button>
-        <button id="vt-qc" onclick="setView('qc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>시험관리</button>
+        <button id="vt-misc" onclick="setView('misc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>기타 기능</button>
         <button id="vt-supplies" onclick="setView('supplies')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>발주</button>
         <button id="vt-wr" onclick="setView('wr')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg>주간보고</button>
       </div>
@@ -1074,10 +974,10 @@
 <div class="scrim" id="lr-scrim"><div class="modal" id="lr-modal"></div></div>
 <div class="scrim" id="leavebell-scrim"><div class="modal" id="leavebell-modal"></div></div>
 <div class="scrim" id="signupbell-scrim"><div class="modal" id="signupbell-modal"></div></div>
-<div class="scrim" id="qcnote-scrim"><div class="modal" id="qcnote-modal"></div></div>
 <div class="scrim" id="wr-search-scrim"><div class="modal wr-search-modal" id="wr-search-modal"></div></div>
 <div class="scrim" id="announce-scrim"><div class="modal" id="announce-modal"></div></div>
 <div class="scrim" id="announce-manage-scrim"><div class="modal" id="announce-manage-modal"></div></div>
+<div class="scrim" id="assign-done-scrim"><div class="modal" id="assign-done-modal"></div></div>
 
 <div class="scrim show" id="auth-scrim" style="z-index:9999;">
   <div class="modal" id="auth-modal" style="max-width:360px;"></div>
@@ -1199,7 +1099,7 @@ async function afterLogin(){
     // 사무용품 계정은 발주 탭 외 데이터를 조회할 필요가 없음 — 불필요한 조회 최소화
     await Promise.all([loadProfilesMap(),supplyLoadState()]);
   }else{
-    const loaders=[loadProfilesMap(),loadAll(),loadLeaveRequests(),qcLoadData(),supplyLoadState(),wrInitLoad(),assignLoad()];
+    const loaders=[loadProfilesMap(),loadAll(),loadLeaveRequests(),supplyLoadState(),wrInitLoad(),assignLoad(),itpLoad()];
     if(isLeader())loaders.push(loadPendingSignups());
     await Promise.all(loaders);
   }
@@ -1254,20 +1154,11 @@ function subscribeRealtime(){
       if(viewMode==='assign')assignRenderShell();
     }).subscribe();
   }
-  sb.channel('qc_tracker_ch').on('postgres_changes',{event:'*',schema:'public',table:'qc_tracker_data'},payload=>{
-    if(payload.eventType!=='DELETE' && payload.new && payload.new.updated_by===profile.id)return;
-    const rowId=(payload.new&&payload.new.id)||(payload.old&&payload.old.id);
-    if(payload.eventType==='DELETE'){
-      qcProjects=qcProjects.filter(x=>x.id!==rowId);
-      if(rowId===qcActiveId&&qcProjects.length)qcSwitchProject(qcProjects[0].id,true);
-    }else{
-      const p=payload.new.payload||{};
-      const name=(p.project&&p.project.name)||'(이름 없음)';
-      const existing=qcProjects.find(x=>x.id===rowId);
-      if(existing)existing.name=name; else qcProjects.push({id:rowId,name});
-      if(rowId===qcActiveId){qcApplyPayload(p);if(viewMode==='qc')qcRender();}
-    }
-    if(viewMode==='qc')qcRenderProjectSelect();
+  sb.channel('itp_numbers_ch').on('postgres_changes',{event:'*',schema:'public',table:'itp_numbers'},async(payload)=>{
+    const changedBy=(payload.new&&payload.new.created_by)||(payload.old&&payload.old.created_by);
+    if(payload.eventType!=='DELETE' && changedBy===profile.id)return;
+    await itpLoad();
+    if(viewMode==='misc')miscRenderShell();
   }).subscribe();
   sb.channel('supply_items_ch').on('postgres_changes',{event:'*',schema:'public',table:'supply_items'},async(payload)=>{
     const changedBy=(payload.new&&payload.new.updated_by)||(payload.new&&payload.new.requester_id);
@@ -1353,6 +1244,7 @@ async function saveAnnouncement(){
   closeAnnounceManage();
 }
 document.getElementById('announce-manage-scrim').addEventListener('click',ev=>{if(ev.target.id==='announce-manage-scrim')closeAnnounceManage();});
+document.getElementById('assign-done-scrim').addEventListener('click',ev=>{if(ev.target.id==='assign-done-scrim')assignCloseDoneList();});
 function openSignupBell(){renderSignupBellModal();document.getElementById('signupbell-scrim').classList.add('show');}
 function closeSignupBell(){document.getElementById('signupbell-scrim').classList.remove('show');}
 function renderSignupBellModal(){
@@ -1427,7 +1319,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
 
 /* ── 도움말 · 업데이트 이력 ── */
 const CHANGELOG=[
-  {ver:'v22', date:'2026-07', cur:true, items:[
+  {ver:'v23', date:'2026-10', cur:true, items:[
+    '칸반 탭을 <b>업무분장</b> 탭으로 교체 — 파트장이 할일을 생성·드래그로 팀원에게 배정, 팀원은 완료 체크로 처리',
+    '업무분장 탭에 전체/인원별 진행 현황 + "완료한 업무 보기"(최근 완료 순) 추가',
+    '시험관리(QC 트래커) 탭 제거, <b>기타 기능</b> 탭 신설 — 첫 기능으로 ITP 번호대장(LTTD-연도-K순번, 연도별 자동 순번 발급) 추가',
+  ]},
+  {ver:'v22', date:'2026-07', items:[
     '캘린더 프로젝트 필터를 복수 선택으로 — 각 프로젝트를 겹쳐 보기, 전체는 전부 표시',
   ]},
   {ver:'v21', date:'2026-07', items:[
@@ -1522,7 +1419,8 @@ const GUIDE=[
   {k:'＋', t:'<b>일정 추가</b> — 캘린더 빈 날짜를 클릭하거나 [+ 새 일정] 버튼을 누르세요.'},
   {k:'✎', t:'<b>프로젝트 편집</b> — 프로젝트 칩의 ✎를 눌러 이름과 <b>색상(프리셋·커스텀)</b>을 바꿉니다.'},
   {k:'☑', t:'<b>할일 관리</b> — 일정을 열어 할일을 추가하고 우선순위·상태를 지정합니다.'},
-  {k:'⇅', t:'<b>칸반</b> — 상단 [칸반] 탭에서 카드를 끌어 대기→진행→검토→완료로 옮깁니다.'},
+  {k:'📌', t:'<b>업무분장</b> — [업무분장] 탭 맨 오른쪽에서 할일을 만들고, 파트장은 카드를 팀원 칸으로 드래그해 배정합니다. 배정받은 사람은 ✓로 완료 처리하고, 오른쪽 패널에서 전체 진행률과 "완료한 업무 보기"를 확인하세요.'},
+  {k:'🔖', t:'<b>기타 기능 · ITP 번호대장</b> — [기타 기능] 탭에서 ITP 번호(LTTD-연도-K순번)를 발급·조회합니다. 순번은 연도별로 자동 관리되고, 매년 K001부터 다시 시작돼요.'},
   {k:'🏖', t:'<b>휴가</b> — [휴가] 탭에 입사일을 넣으면 연차 발생·사용·잔여를 자동 계산. 일정 모달에서 ‘휴가로 집계’를 켜 연차/반차/시간연차를 지정하세요.'},
   {k:'📝', t:'<b>메모</b> — [메모] 탭에서 <b>전체</b>(큰 한 칸, 기본)와 <b>날짜별</b>을 전환합니다. 날짜별은 날짜를 추가하면 카드가 하나씩 생겨 한 화면에 여러 날짜 메모가 함께 보여요.'},
   {k:'🖨', t:'<b>캘린더 인쇄·이미지·공유</b> — 상단 [인쇄]는 인쇄/PDF, [이미지]는 PNG로 저장(폰 사진처럼 한 장), [공유]는 카톡·메시지 등으로 이미지 전송.'},
@@ -1682,26 +1580,26 @@ function setView(v){
   document.getElementById('vt-cal').classList.toggle('on',v==='calendar');
   document.getElementById('vt-assign').classList.toggle('on',v==='assign');
   document.getElementById('vt-note').classList.toggle('on',v==='note');
-  document.getElementById('vt-qc').classList.toggle('on',v==='qc');
+  document.getElementById('vt-misc').classList.toggle('on',v==='misc');
   document.getElementById('vt-supplies').classList.toggle('on',v==='supplies');
   document.getElementById('vt-wr').classList.toggle('on',v==='wr');
   renderAll();
 }
 function renderAll(){
   const ctrlBar=document.getElementById('controls-bar');
-  if(viewMode==='supplies'||viewMode==='qc'||viewMode==='wr'||viewMode==='assign'){ if(ctrlBar)ctrlBar.style.display='none'; }
+  if(viewMode==='supplies'||viewMode==='misc'||viewMode==='wr'||viewMode==='assign'){ if(ctrlBar)ctrlBar.style.display='none'; }
   else{ if(ctrlBar)ctrlBar.style.display=''; renderProjectBar(); }
   const layout=document.getElementById('layout'),tp=document.getElementById('todo-panel');
   if(viewMode==='assign'){layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';assignRenderShell();}
   else if(viewMode==='leave'){layout.classList.add('kanban-mode');tp.style.display='none';renderLeaveView();}
   else if(viewMode==='note'){layout.classList.add('kanban-mode');tp.style.display='none';renderNotesView();}
   else if(viewMode==='stat'){layout.classList.add('kanban-mode');tp.style.display='none';renderStatsView();}
-  else if(viewMode==='qc'){layout.classList.add('kanban-mode');tp.style.display='none';qcRenderShell();}
+  else if(viewMode==='misc'){layout.classList.add('kanban-mode');tp.style.display='none';miscRenderShell();}
   else if(viewMode==='supplies'){layout.classList.add('kanban-mode');tp.style.display='none';renderSuppliesView();}
   else if(viewMode==='wr'){layout.classList.add('kanban-mode');tp.style.display='none';wrRenderShell();}
   else{layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';renderCal();renderTodos();}
 }
-function refreshBg(){if(viewMode==='assign')assignRenderShell();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='qc')qcRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='qc'&&viewMode!=='wr'&&viewMode!=='assign')renderProjectBar();}
+function refreshBg(){if(viewMode==='assign')assignRenderShell();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='misc')miscRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='misc'&&viewMode!=='wr'&&viewMode!=='assign')renderProjectBar();}
 
 let showArchivedProj=false;
 function renderProjectBar(){
@@ -2682,9 +2580,29 @@ function renderAssignStats(){
       <div class="as-bar"><div class="as-bar-fill" style="width:${pct}%"></div></div>
       <div class="as-overall-txt">전체 ${total}건 · 완료 ${doneCnt} · 진행중 ${openCnt} <span class="mono">(${pct}%)</span></div>
       <div class="as-overall-txt">미배정 대기 ${poolCnt}건</div>
+      <div class="as-done-link" onclick="assignOpenDoneList()">완료한 업무 보기<span class="arr">→</span></div>
     </div>
     <div class="as-people">${prows||'<div class="tp-empty">표시할 팀원이 없어요.</div>'}</div>`;
 }
+function assignOpenDoneList(){
+  const list=assignTasks.filter(t=>t.status==='done').sort((a,b)=>(b.done_at||'').localeCompare(a.done_at||''));
+  const rows=list.length?list.map(t=>{
+    const p=PRIO[t.priority]||PRIO.mid;
+    const person=profilesMap[t.assignee];
+    const who=person?person.name:'(미배정)';
+    const when=t.done_at?new Date(t.done_at).toLocaleString('ko-KR'):'';
+    return `<div class="adone-item">
+      <div class="adone-top"><span class="pill ${p.cls}">${p.lbl}</span><span class="adone-who">${esc(who)}</span><span class="adone-when">${when}</span></div>
+      <div class="adone-text">${esc(t.text)}</div>
+    </div>`;
+  }).join(''):`<div class="kempty">아직 완료한 업무가 없어요.</div>`;
+  document.getElementById('assign-done-modal').innerHTML=`
+    <div class="m-head"><div class="m-date">완료한 업무 (최근 완료 순)</div></div>
+    <div class="m-body"><div class="adone-list">${rows}</div></div>
+    <div class="m-foot"><div class="left"></div><button class="ghost" onclick="assignCloseDoneList()">닫기</button></div>`;
+  document.getElementById('assign-done-scrim').classList.add('show');
+}
+function assignCloseDoneList(){document.getElementById('assign-done-scrim').classList.remove('show');}
 function assignDragStart(ev,id){assignDragId=id;ev.currentTarget.classList.add('dragging');ev.dataTransfer.effectAllowed='move';}
 function dragEnd(ev){ev.currentTarget.classList.remove('dragging');}
 function assignAllowDrop(ev,col){ev.preventDefault();col.classList.add('drop');}
@@ -2876,549 +2794,108 @@ document.getElementById('scrim').addEventListener('click',ev=>{if(ev.target.id==
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&openId)closeModal();});
 function tick(){const d=new Date();document.getElementById('clock').textContent=`${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${WD[d.getDay()]} ${pad(d.getHours())}:${pad(d.getMinutes())}`;const ds=ymd(d);if(ds!==TODAY_STR){TODAY_STR=ds;TODAY_NUM=dayNum(ds);if(!openId)refreshBg();}}
 
-/* ═══════════ 시험 진행 관리(QC 트래커) — 팀 전체 공유, 전원 편집 가능 ═══════════ */
-let qcColumns=[], qcUnits=[], qcProject={name:''}, qcFilterCat='all', qcDragSrcId=null;
-let qcProjects=[], qcActiveId='main';
-let lastSelfQcSaveAt=0;
-
-function qcDefaultColumns(){
-  return ['표지','치수','도막','저항','변압비','각변위','부하손 15','부하손 18','무부하손','AC','유도 내전압','누유','절연저항','LCP','BCT']
-    .map(n => ({ id: uid(), name:n, category:'routine' }));
-}
-function qcNextNo(){
-  const nums = qcUnits.map(u => parseInt(u.no,10)).filter(n => !isNaN(n));
-  return String((nums.length ? Math.max(...nums) : 0) + 1);
-}
-function qcNewUnit(cap, no){
-  return { id: uid(), no: (no!==undefined?no:qcNextNo()), capacity: cap||'', tests: new Array(qcColumns.length).fill(0) };
-}
-function qcApplyPayload(payload){
-  qcColumns=(payload&&payload.columns)||qcDefaultColumns();
-  qcUnits=((payload&&payload.units)||[]).map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:u.capacity||'',tests:u.tests||[],notes:u.notes||{}}));
-  qcProject=(payload&&payload.project)||{name:''};
-}
-async function qcLoadData(){
-  const {data:rows,error}=await sb.from('qc_tracker_data').select('id,payload').order('updated_at',{ascending:true});
-  if(error){
-    console.error(error);
-    alert('시험관리 데이터를 불러오지 못했어요. 인터넷 연결을 확인하고 새로고침 해주세요. (안전을 위해 새 프로젝트를 만들지 않았어요)');
-    qcProjects=[]; qcActiveId=null; qcColumns=qcDefaultColumns(); qcUnits=[]; qcProject={name:''};
-    return;
-  }
-  if(!rows||rows.length===0){
-    qcActiveId='main';
-    qcApplyPayload(null);
-    qcProjects=[{id:'main',name:'(이름 없음)'}];
-    const {error:insErr}=await sb.from('qc_tracker_data').insert({id:'main',payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
-    if(insErr){console.error(insErr);alert('첫 프로젝트 생성 중 오류가 발생했어요. 새로고침 후 다시 시도해주세요.');}
-    return;
-  }
-  qcProjects=rows.map(r=>({id:r.id,name:(r.payload&&r.payload.project&&r.payload.project.name)||'(이름 없음)'}));
-  let saved=null;
-  try{saved=localStorage.getItem('qc-active-project-id');}catch(e){}
-  const target=rows.find(r=>r.id===saved)||rows[0];
-  qcActiveId=target.id;
-  qcApplyPayload(target.payload);
-}
-async function qcSave(){
-  const statusEl=document.getElementById('qc-save-status');
-  if(statusEl){statusEl.textContent='저장 중…';statusEl.classList.remove('save-error');statusEl.classList.add('saving');statusEl.onclick=null;}
-  lastSelfQcSaveAt=Date.now();
-  const {error}=await sb.from('qc_tracker_data').update({payload:{columns:qcColumns,units:qcUnits,project:qcProject},updated_by:profile.id,updated_at:new Date().toISOString()}).eq('id',qcActiveId);
-  const s2=document.getElementById('qc-save-status');
-  if(error){
-    console.error(error);
-    if(s2){s2.classList.remove('saving');s2.textContent='⚠ 저장 실패 · 클릭해서 재시도';s2.classList.add('save-error');s2.onclick=qcSave;}
-    return false;
-  }
-  const p=qcProjects.find(x=>x.id===qcActiveId);
-  if(p)p.name=(qcProject.name&&qcProject.name.trim())||'(이름 없음)';
-  if(s2){s2.classList.remove('saving','save-error');s2.textContent='저장됨';s2.onclick=null;}
-  return true;
-}
-async function qcSwitchProject(id,skipSaveCurrent){
-  if(id===qcActiveId||!id)return;
-  if(!skipSaveCurrent)await qcSave();
-  const {data:row}=await sb.from('qc_tracker_data').select('payload').eq('id',id).maybeSingle();
-  qcActiveId=id;
-  try{localStorage.setItem('qc-active-project-id',id);}catch(e){}
-  qcApplyPayload(row&&row.payload);
-  qcRender();
-  qcRenderProjectSelect();
-}
-async function qcCreateProject(){
-  const name=prompt('새 프로젝트 이름을 입력해줘 (나중에 바꿀 수 있어)','');
-  if(name===null)return;
-  await qcSave();
-  const newId=uid();
-  const newColumns=qcDefaultColumns();
-  const newProject={name:name.trim()};
-  await sb.from('qc_tracker_data').insert({id:newId,payload:{columns:newColumns,units:[],project:newProject}});
-  qcProjects.push({id:newId,name:newProject.name||'(이름 없음)'});
-  qcActiveId=newId;
-  try{localStorage.setItem('qc-active-project-id',newId);}catch(e){}
-  qcColumns=newColumns;qcUnits=[];qcProject=newProject;
-  qcRender();
-  qcRenderProjectSelect();
-}
-async function qcDeleteProject(id){
-  if(qcProjects.length<=1){alert('마지막 남은 프로젝트는 삭제할 수 없어. 내용을 비우려면 "전체 초기화"를 써줘.');return;}
-  const p=qcProjects.find(x=>x.id===id);
-  if(!confirm(`"${p?p.name:''}" 프로젝트를 목록에서 완전히 삭제할까? 되돌릴 수 없어.`))return;
-  await sb.from('qc_tracker_data').delete().eq('id',id);
-  qcProjects=qcProjects.filter(x=>x.id!==id);
-  if(qcActiveId===id)await qcSwitchProject(qcProjects[0].id,true);
-  else qcRenderProjectSelect();
-}
-function qcRenderProjectSelect(){
-  const sel=document.getElementById('qcProjectSelect');
-  if(!sel)return;
-  sel.innerHTML=qcProjects.map(p=>`<option value="${p.id}" ${p.id===qcActiveId?'selected':''}>${esc(p.name||'(이름 없음)')}</option>`).join('');
-}
-
-/* ── 칸별 메모(비고) ── */
-let qcNoteTarget=null;
-function qcOpenNote(unitId,colId){
-  qcNoteTarget={unitId,colId};
-  const u=qcUnits.find(x=>x.id===unitId);
-  const col=qcColumns.find(x=>x.id===colId);
-  const val=(u&&u.notes&&u.notes[colId])||'';
-  document.getElementById('qcnote-modal').innerHTML=`
-    <div class="m-head"><div class="m-date">${esc(u?u.no:'')}호기 · ${esc(col?col.name:'')} 메모</div></div>
-    <div class="m-body"><textarea id="qcnote-text" class="m-memo" placeholder="시험 중 특이사항, 재확인할 내용 등을 적어줘" style="width:100%;min-height:130px;">${esc(val)}</textarea></div>
-    <div class="m-foot"><div class="left">${val?'<button class="ghost" onclick="qcDeleteNote()">메모 삭제</button>':''}</div><button class="done-btn" onclick="qcSaveNote()">저장</button></div>`;
-  document.getElementById('qcnote-scrim').classList.add('show');
-}
-function qcCloseNote(){document.getElementById('qcnote-scrim').classList.remove('show');qcNoteTarget=null;}
-async function qcSaveNote(){
-  if(!qcNoteTarget)return;
-  const {unitId,colId}=qcNoteTarget;
-  const u=qcUnits.find(x=>x.id===unitId);
-  if(!u)return;
-  if(!u.notes)u.notes={};
-  const text=document.getElementById('qcnote-text').value.trim();
-  if(text)u.notes[colId]=text; else delete u.notes[colId];
-  await qcSave();
-  qcCloseNote();
-  qcRender();
-}
-async function qcDeleteNote(){
-  if(!qcNoteTarget)return;
-  const {unitId,colId}=qcNoteTarget;
-  const u=qcUnits.find(x=>x.id===unitId);
-  if(u&&u.notes)delete u.notes[colId];
-  await qcSave();
-  qcCloseNote();
-  qcRender();
-}
-document.getElementById('qcnote-scrim').addEventListener('click',ev=>{if(ev.target.id==='qcnote-scrim')qcCloseNote();});
-async function qcLoadArchive(){
-  const {data:rows}=await sb.from('qc_tracker_archive').select('*').order('saved_at',{ascending:false});
-  return (rows||[]).map(r=>({id:r.id,savedAt:r.saved_at,name:r.name,columns:(r.payload&&r.payload.columns)||[],units:(r.payload&&r.payload.units)||[]}));
-}
-async function qcSaveAndReset(){
-  if(qcUnits.length===0 && !qcProject.name.trim()){alert('저장할 내용이 없어.');return;}
-  if(!confirm('현재 프로젝트를 완료 처리해서 "지난 기록"으로 옮길까? 활성 목록에서는 사라져.'))return;
-  const label=qcProject.name.trim()||('프로젝트 '+new Date().toLocaleString('ko-KR'));
-  const {error:archErr}=await sb.from('qc_tracker_archive').insert({name:label,payload:{columns:JSON.parse(JSON.stringify(qcColumns)),units:JSON.parse(JSON.stringify(qcUnits))}});
-  if(archErr){
-    console.error(archErr);
-    alert('지난 기록으로 저장하는 중 오류가 발생했어요. 원본은 그대로 남아있으니 다시 시도해줘.');
-    return;
-  }
-  const doneId=qcActiveId;
-  const {error:delErr}=await sb.from('qc_tracker_data').delete().eq('id',doneId);
-  if(delErr){
-    console.error(delErr);
-    alert('지난 기록 저장은 됐는데, 원래 프로젝트를 활성 목록에서 지우는 데 실패했어요. 목록에 중복으로 남아있을 수 있으니 새로고침 후 확인해줘.');
-    return;
-  }
-  qcProjects=qcProjects.filter(p=>p.id!==doneId);
-  if(qcProjects.length===0){
-    const newId=uid();
-    qcColumns=qcDefaultColumns();qcUnits=[];qcProject={name:''};
-    const {error:insErr}=await sb.from('qc_tracker_data').insert({id:newId,payload:{columns:qcColumns,units:qcUnits,project:qcProject}});
-    if(insErr){console.error(insErr);alert('새 프로젝트 생성 중 오류가 발생했어요. 새로고침 후 "+ 새 프로젝트"로 다시 만들어줘.');return;}
-    qcActiveId=newId;
-    qcProjects=[{id:newId,name:'(이름 없음)'}];
-    try{localStorage.setItem('qc-active-project-id',newId);}catch(e){}
-  }else{
-    qcActiveId=null; // 삭제된 프로젝트로 스킵 저장되지 않도록
-    await qcSwitchProject(qcProjects[0].id,true);
-    return;
-  }
-  qcRender();
-  qcRenderProjectSelect();
-}
-function qcVisibleColumns(){
-  if(qcFilterCat==='all')return qcColumns.map((c,i)=>({...c,idx:i}));
-  return qcColumns.map((c,i)=>({...c,idx:i})).filter(c=>c.category===qcFilterCat);
-}
-function qcIsEffDone(u,ci){
-  if((u.tests[ci]||0)===1)return true;
-  const col=qcColumns[ci];
-  if(col&&col.category==='type'){
-    const cap=(u.capacity||'').trim();
-    if(cap)return qcUnits.some(o=>o.id!==u.id&&(o.capacity||'').trim()===cap&&(o.tests[ci]||0)===1);
-  }
-  return false;
-}
-function qcRenderShell(){
+/* ═══════════ 기타 기능 탭 (확장 가능한 소규모 도구 모음) ═══════════ */
+const MISC_TOOLS=[{id:'itp',label:'ITP 번호대장',icon:'📋'}];
+let miscSection='itp';
+function miscSetSection(id){miscSection=id;miscRenderShell();}
+function miscRenderShell(){
   const wrap=document.getElementById('main-panel');
-  wrap.innerHTML=`<div id="qc-view"><div class="wrap">
-    <header>
-      <div class="title-block">
-        <div class="qc-project-switch">
-          <select id="qcProjectSelect"></select>
-          <button id="qcBtnAddProject" title="새 프로젝트 만들기">+ 새 프로젝트</button>
-          <button class="danger" id="qcBtnDelProject" title="현재 프로젝트를 목록에서 삭제">🗑</button>
-        </div>
-        <div class="meta-row"><input type="text" id="qcProjName" class="meta-input meta-name" placeholder="프로젝트명"></div>
-        <div class="sub">호기별 시험 항목 완료 체크 · 클릭으로 상태 전환 · 자동 저장 · 팀 전체 공유 · <span id="qc-save-status" style="font-weight:600;">저장됨</span></div>
-      </div>
-      <div class="stat-row">
-        <div class="ring"><svg viewBox="0 0 56 56"><circle class="bg" cx="28" cy="28" r="24"></circle><circle class="fg" id="qcRingFg" cx="28" cy="28" r="24" stroke-dasharray="150.8" stroke-dashoffset="150.8"></circle></svg><div class="pct" id="qcRingPct">0%</div></div>
-        <div class="stat-nums">전체 완료 호기 <b id="qcStatUnitsDone">0</b>/<span id="qcStatUnitsTotal">0</span><br>전체 항목 완료 <b id="qcStatCellsDone">0</b>/<span id="qcStatCellsTotal">0</span></div>
-      </div>
-    </header>
-    <div class="toolbar">
-      <div class="grp"><button class="primary" id="qcBtnAddRows">호기 추가</button></div>
-      <div class="grp"><button id="qcBtnTogglePaste">목록 붙여넣기</button><button id="qcBtnToggleCols">시험 항목 관리</button></div>
-      <div class="grp"><button class="primary" id="qcBtnSaveArchive">저장하고 새로 시작</button><button id="qcBtnToggleArchive">지난 기록 조회</button></div>
-      <div class="grp"><button class="tab active" data-filter="all">전체</button><button class="tab" data-filter="routine">루틴시험</button><button class="tab" data-filter="type">타입시험</button></div>
-      <div class="grp"><button id="qcBtnExportCsv">CSV 내보내기</button><button id="qcBtnExportJson">백업(JSON)</button><button id="qcBtnImportJson">불러오기</button><input type="file" id="qcFileImport" accept="application/json" style="display:none;"></div>
-      <div class="grp" style="border-right:none;"><button class="danger" id="qcBtnReset">전체 초기화</button></div>
-    </div>
-    <div class="panel" id="qcPastePanel">
-      <div class="hint">한 줄에 하나씩 용량을 붙여넣으면 새 호기로 일괄 추가돼 (호기 번호는 자동 부여). 콤마로 구분해도 됨.</div>
-      <textarea id="qcPasteArea" placeholder="예)&#10;2000kVA&#10;3000kVA&#10;3000kVA"></textarea>
-      <div class="actions"><button id="qcBtnPasteCancel">취소</button><button class="primary" id="qcBtnPasteConfirm">추가</button></div>
-    </div>
-    <div class="panel" id="qcColPanel">
-      <div class="hint">시험 항목을 추가·삭제하고, 각 항목이 루틴시험인지 타입시험인지 지정해줘. 왼쪽 손잡이(⠿)를 드래그하면 표 순서를 바꿀 수 있어.<br>※ 타입시험은 같은 <b>용량</b> 값을 가진 호기끼리 한 번 체크하면 전부 같이 반영돼 (용량 미입력 호기는 개별 적용).</div>
-      <div class="col-list" id="qcColList"></div>
-      <div class="col-add"><input type="text" id="qcNewColName" placeholder="새 항목명 (예: 온도상승시험)"><select id="qcNewColCat"><option value="routine">루틴시험</option><option value="type">타입시험</option></select><button class="primary" id="qcBtnAddCol">추가</button></div>
-      <div class="actions"><button id="qcBtnColDone">닫기</button></div>
-    </div>
-    <div class="panel" id="qcArchivePanel">
-      <div class="hint">예전에 저장해둔 기록이야. 불러오면 지금 화면 내용을 덮어써.</div>
-      <div class="col-list" id="qcArchiveList"></div>
-      <div class="actions"><button id="qcBtnArchiveDone">닫기</button></div>
-    </div>
-    <div class="table-scroll"><table id="qcMainTable"><thead><tr id="qcHeadRow"><th class="corner corner-no">호기</th><th class="corner corner-cap">용량</th></tr></thead><tbody id="qcBodyRows"></tbody><tfoot><tr id="qcFootRow"><th class="corner">항목별 완료</th></tr></tfoot></table></div>
-    <datalist id="qcCapList"></datalist>
-    <div class="legend">
-      <div class="item"><span class="sw pending"></span>미완료</div>
-      <div class="item"><span class="sw done"></span>완료 (직접 시험)</div>
-      <div class="item"><span class="sw exempt">×</span>동일타입 적용 (그룹 내 다른 호기가 시험함)</div>
-      <div class="item"><span class="sw dot routine"></span>루틴시험 (호기별 개별 체크)</div>
-      <div class="item"><span class="sw dot type"></span>타입시험 (같은 용량 그룹에서 1대만 하면 나머지는 자동 적용)</div>
-    </div>
-  </div></div>`;
-  qcAttachEvents();
-  qcRenderProjectSelect();
-  qcRender();
+  const sideItems=MISC_TOOLS.map(t=>`<button class="misc-side-item ${miscSection===t.id?'active':''}" onclick="miscSetSection('${t.id}')">${t.icon} ${esc(t.label)}</button>`).join('');
+  wrap.innerHTML=`<div class="misc-wrap">
+    <div class="misc-side"><div class="misc-side-title">기타 기능</div>${sideItems}</div>
+    <div class="misc-main" id="misc-main"></div>
+  </div>`;
+  miscRenderSection();
 }
-function qcRender(){
-  document.getElementById('qcProjName').value=qcProject.name;
-  const cols=qcVisibleColumns();
-  const headRow=document.getElementById('qcHeadRow'),bodyRows=document.getElementById('qcBodyRows'),footRow=document.getElementById('qcFootRow');
-  headRow.innerHTML='<th class="corner corner-no">호기</th><th class="corner corner-cap">용량</th>'+
-    cols.map(c=>`<th class="colname ${c.category}"><span class="lbl">${esc(c.name)}</span></th>`).join('')+
-    '<th class="progresshead">완료</th>';
-  const totalCols=qcColumns.length;
-  if(qcUnits.length===0){
-    bodyRows.innerHTML=`<tr><td class="empty-msg" colspan="${cols.length+3}">등록된 호기가 없어. 상단에서 호기를 추가하거나 목록을 붙여넣어줘.</td></tr>`;
-  }else{
-    bodyRows.innerHTML=qcUnits.map(u=>{
-      const done=qcColumns.reduce((acc,_,ci)=>acc+(qcIsEffDone(u,ci)?1:0),0);
-      const complete=totalCols>0&&done===totalCols;
-      const cells=cols.map(c=>{
-        const own=u.tests[c.idx]||0;
-        let cls='',mark='',dotStyle='background:#414f68 !important;border-color:#5a6883 !important;color:#f2f4f8 !important;';
-        if(own===1){cls='done';dotStyle='background:#43d68a !important;border-color:#43d68a !important;color:#0e2417 !important;';}
-        else if(qcIsEffDone(u,c.idx)){cls='exempt';mark='×';dotStyle='background:transparent !important;border:1px dashed #f0bb52 !important;color:#f0bb52 !important;';}
-        const hasNote=!!(u.notes&&u.notes[c.id]&&u.notes[c.id].trim());
-        const noteMark=`<span class="note-mark ${hasNote?'has-note':''}" data-uid="${u.id}" data-cid="${c.id}" title="${hasNote?'메모 있음 — 클릭해서 보기':'클릭해서 메모 추가'}"></span>`;
-        return `<td class="qccell ${cls} ${c.category==='type'?'typecol':''}" data-uid="${u.id}" data-ci="${c.idx}"><div class="dot" style="${dotStyle}">${mark}</div>${noteMark}</td>`;
-      }).join('');
-      return `<tr class="${complete?'complete':''}">
-        <th class="rowno"><input type="text" value="${esc(u.no)}" data-uid="${u.id}" class="qcNoInput" style="background:transparent !important;color:#f2f4f8 !important;"></th>
-        <th class="rowname"><div class="row-inner"><input type="text" value="${esc(u.capacity)}" data-uid="${u.id}" class="qcCapInput" placeholder="예: 2000kVA" list="qcCapList" style="background:transparent !important;color:#f2f4f8 !important;"><span class="del" data-uid="${u.id}" title="삭제">×</span></div></th>
-        ${cells}
-        <td class="progress">${done}/${totalCols}</td>
-      </tr>`;
-    }).join('');
-  }
-  const totalUnits=qcUnits.length;
-  footRow.innerHTML='<th class="corner" colspan="2">항목별 완료</th>'+
-    cols.map(c=>{
-      const cnt=qcUnits.filter(u=>qcIsEffDone(u,c.idx)).length;
-      const full=totalUnits>0&&cnt===totalUnits;
-      return `<td class="colsum ${full?'full':''}">${cnt}/${totalUnits}</td>`;
-    }).join('')+'<td></td>';
-  qcUpdateStats();
-  qcBindRowEvents();
-  qcRenderColManager();
-  qcUpdateCapList();
+function miscRenderSection(){
+  if(miscSection==='itp')itpRenderView();
 }
-function qcUpdateCapList(){
-  const dl=document.getElementById('qcCapList');
-  const uniq=[...new Set(qcUnits.map(u=>(u.capacity||'').trim()).filter(Boolean))];
-  dl.innerHTML=uniq.map(v=>`<option value="${esc(v)}"></option>`).join('');
+
+/* ── ITP 번호대장 (LTTD-{연도}-K{순번}, 연도별로 K001부터 매년 리셋) ── */
+let itpNumbers=[];
+function itpFullNo(year,seq){return `LTTD-${year}-K${String(seq).padStart(3,'0')}`;}
+function itpNextSeq(year){const max=itpNumbers.filter(r=>r.year===year).reduce((m,r)=>Math.max(m,r.seq),0);return max+1;}
+async function itpLoad(){
+  const {data:rows,error}=await sb.from('itp_numbers').select('*').order('year',{ascending:false}).order('seq',{ascending:false});
+  if(error){console.error(error);itpNumbers=[];return;}
+  itpNumbers=rows||[];
 }
-function qcUpdateStats(){
-  const totalUnits=qcUnits.length,totalCols=qcColumns.length;
-  const unitsDone=qcUnits.filter(u=>totalCols>0&&qcColumns.every((_,ci)=>qcIsEffDone(u,ci))).length;
-  const totalCells=totalUnits*totalCols;
-  const doneCells=qcUnits.reduce((acc,u)=>acc+qcColumns.reduce((a,_,ci)=>a+(qcIsEffDone(u,ci)?1:0),0),0);
-  document.getElementById('qcStatUnitsDone').textContent=unitsDone;
-  document.getElementById('qcStatUnitsTotal').textContent=totalUnits;
-  document.getElementById('qcStatCellsDone').textContent=doneCells;
-  document.getElementById('qcStatCellsTotal').textContent=totalCells;
-  const pct=totalCells>0?Math.round(doneCells/totalCells*100):0;
-  document.getElementById('qcRingPct').textContent=pct+'%';
-  const circ=150.8;
-  document.getElementById('qcRingFg').style.strokeDashoffset=circ-(circ*pct/100);
-}
-function qcBindRowEvents(){
-  document.querySelectorAll('#qc-view .note-mark').forEach(el=>{
-    el.addEventListener('click',(e)=>{
-      e.stopPropagation();
-      qcOpenNote(el.dataset.uid,el.dataset.cid);
-    });
-  });
-  document.querySelectorAll('#qc-view td.qccell').forEach(td=>{
-    td.onclick=()=>{
-      const uid_=td.dataset.uid,ci=+td.dataset.ci;
-      const u=qcUnits.find(x=>x.id===uid_);
-      if(!u)return;
-      u.tests[ci]=u.tests[ci]===1?0:1;
-      qcSave();qcRender();
-    };
-  });
-  document.querySelectorAll('#qc-view .qcNoInput').forEach(inp=>{
-    inp.onchange=()=>{const u=qcUnits.find(x=>x.id===inp.dataset.uid);if(u){u.no=inp.value.trim();qcSave();qcRender();}};
-  });
-  document.querySelectorAll('#qc-view .qcCapInput').forEach(inp=>{
-    inp.onchange=()=>{const u=qcUnits.find(x=>x.id===inp.dataset.uid);if(u){u.capacity=inp.value.trim();qcSave();qcRender();}};
-  });
-  document.querySelectorAll('#qc-view tbody .del').forEach(el=>{
-    el.onclick=(e)=>{e.stopPropagation();if(!confirm('이 호기를 삭제할까?'))return;qcUnits=qcUnits.filter(u=>u.id!==el.dataset.uid);qcSave();qcRender();};
-  });
-}
-function qcRenderColManager(){
-  const list=document.getElementById('qcColList');
-  if(qcColumns.length===0){list.innerHTML=`<div class="hint">등록된 시험 항목이 없어. 아래에서 추가해줘.</div>`;return;}
-  list.innerHTML=qcColumns.map((c,i)=>`
-    <div class="col-row" draggable="true" data-cid="${c.id}">
-      <span class="handle" title="드래그해서 순서 변경">⠿</span>
-      <span class="tag-dot ${c.category}"></span>
-      <input type="text" value="${esc(c.name)}" data-cid="${c.id}" class="qcColNameInput">
-      <select data-cid="${c.id}" class="qcColCatSelect"><option value="routine" ${c.category==='routine'?'selected':''}>루틴시험</option><option value="type" ${c.category==='type'?'selected':''}>타입시험</option></select>
-      <div class="move-btns"><span class="move-btn ${i===0?'disabled':''}" data-cid="${c.id}" data-dir="up" title="위로">▲</span><span class="move-btn ${i===qcColumns.length-1?'disabled':''}" data-cid="${c.id}" data-dir="down" title="아래로">▼</span></div>
-      <span class="del" data-cid="${c.id}" title="항목 삭제">×</span>
-    </div>`).join('');
-  list.querySelectorAll('.qcColNameInput').forEach(inp=>{
-    inp.onchange=()=>{const c=qcColumns.find(x=>x.id===inp.dataset.cid);if(c){c.name=inp.value.trim()||c.name;qcSave();qcRender();}};
-  });
-  list.querySelectorAll('.qcColCatSelect').forEach(sel=>{
-    sel.onchange=()=>{const c=qcColumns.find(x=>x.id===sel.dataset.cid);if(c){c.category=sel.value;qcSave();qcRender();}};
-  });
-  list.querySelectorAll('.del').forEach(el=>{
-    el.onclick=()=>{
-      if(!confirm('이 시험 항목을 삭제할까? 모든 호기의 해당 체크 데이터도 함께 삭제돼.'))return;
-      const idx=qcColumns.findIndex(x=>x.id===el.dataset.cid);
-      if(idx===-1)return;
-      qcColumns.splice(idx,1);
-      qcUnits.forEach(u=>u.tests.splice(idx,1));
-      qcSave();qcRender();
-    };
-  });
-  list.querySelectorAll('.move-btn').forEach(btn=>{
-    btn.onclick=()=>{
-      const idx=qcColumns.findIndex(x=>x.id===btn.dataset.cid);
-      const dir=btn.dataset.dir==='up'?-1:1;
-      const swapIdx=idx+dir;
-      if(idx===-1||swapIdx<0||swapIdx>=qcColumns.length)return;
-      [qcColumns[idx],qcColumns[swapIdx]]=[qcColumns[swapIdx],qcColumns[idx]];
-      qcUnits.forEach(u=>{[u.tests[idx],u.tests[swapIdx]]=[u.tests[swapIdx],u.tests[idx]];});
-      qcSave();qcRender();
-    };
-  });
-  qcDragSrcId=null;
-  list.querySelectorAll('.col-row').forEach(row=>{
-    row.addEventListener('dragstart',(e)=>{qcDragSrcId=row.dataset.cid;row.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',qcDragSrcId);});
-    row.addEventListener('dragend',()=>{row.classList.remove('dragging');list.querySelectorAll('.col-row').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom'));});
-    row.addEventListener('dragover',(e)=>{e.preventDefault();if(!qcDragSrcId||row.dataset.cid===qcDragSrcId)return;const rect=row.getBoundingClientRect();const before=(e.clientY-rect.top)<rect.height/2;row.classList.toggle('drag-over-top',before);row.classList.toggle('drag-over-bottom',!before);});
-    row.addEventListener('dragleave',()=>{row.classList.remove('drag-over-top','drag-over-bottom');});
-    row.addEventListener('drop',(e)=>{e.preventDefault();const targetId=row.dataset.cid;const after=row.classList.contains('drag-over-bottom');row.classList.remove('drag-over-top','drag-over-bottom');if(qcDragSrcId&&targetId&&qcDragSrcId!==targetId){qcMoveColumn(qcDragSrcId,targetId,after);}qcDragSrcId=null;});
-  });
-}
-function qcMoveColumn(fromId,toId,after){
-  const fromIdx=qcColumns.findIndex(c=>c.id===fromId);
-  let toIdx=qcColumns.findIndex(c=>c.id===toId);
-  if(fromIdx===-1||toIdx===-1||fromIdx===toIdx)return;
-  if(after)toIdx++;
-  if(fromIdx<toIdx)toIdx--;
-  const move=(arr)=>{const v=arr.splice(fromIdx,1)[0];arr.splice(toIdx,0,v);};
-  move(qcColumns);
-  qcUnits.forEach(u=>move(u.tests));
-  qcSave();qcRender();
-}
-async function qcRenderArchivePanel(){
-  const list=document.getElementById('qcArchiveList');
-  list.innerHTML=`<div class="hint">불러오는 중…</div>`;
-  const archive=await qcLoadArchive();
-  if(archive.length===0){list.innerHTML=`<div class="hint">저장된 기록이 없어.</div>`;return;}
-  list.innerHTML=archive.map(a=>{
-    const totalUnits=a.units.length,totalCols=a.columns.length;
-    const doneCells=a.units.reduce((acc,u)=>acc+a.columns.reduce((s,_,ci)=>{
-      const own=u.tests[ci]||0;
-      if(own===1)return s+1;
-      const col=a.columns[ci];
-      if(col&&col.category==='type'){
-        const cap=(u.capacity||'').trim();
-        if(cap&&a.units.some(o=>o.id!==u.id&&(o.capacity||'').trim()===cap&&(o.tests[ci]||0)===1))return s+1;
-      }
-      return s;
-    },0),0);
-    const totalCells=totalUnits*totalCols;
-    const pct=totalCells>0?Math.round(doneCells/totalCells*100):0;
-    const dateStr=new Date(a.savedAt).toLocaleString('ko-KR');
-    return `<div class="arc-row">
-      <div class="arc-info"><div class="arc-name">${esc(a.name)}</div><div class="arc-meta">${dateStr} · 호기 ${totalUnits}개 · 항목 ${totalCols}개 · 완료 ${pct}%</div></div>
-      <div class="arc-actions"><button class="primary qcArcLoad" data-aid="${a.id}">불러오기</button><button class="danger qcArcDel" data-aid="${a.id}">삭제</button></div>
+function itpRenderView(){
+  const el=document.getElementById('misc-main');if(!el)return;
+  const curYear=new Date().getFullYear();
+  const years=Array.from(new Set([curYear-1,curYear,curYear+1,...itpNumbers.map(r=>r.year)])).sort((a,b)=>b-a);
+  const yearOpts=years.map(y=>`<option value="${y}" ${y===curYear?'selected':''}>${y}년</option>`).join('');
+  const previewYear=curYear, previewSeq=itpNextSeq(previewYear);
+  const rows=itpNumbers.map(t=>{
+    const who=(profilesMap[t.created_by]||{}).name||'알 수 없음';
+    const when=t.created_at?new Date(t.created_at).toLocaleDateString('ko-KR'):'';
+    const metaParts=[t.item_desc,t.note].filter(Boolean);
+    const del=isLeader()?`<span class="itp-del" onclick="itpDeleteNumber('${t.id}')" title="삭제">✕</span>`:'';
+    return `<div class="itp-row">
+      <span class="itp-no">${esc(t.full_no)}</span>
+      <span class="itp-meta">${metaParts.length?esc(metaParts.join(' · ')):'<span style=\"opacity:.5\">(내용 없음)</span>'}</span>
+      <span class="itp-who-when">${esc(who)} · ${when}</span>
+      ${del}
     </div>`;
   }).join('');
-  list.querySelectorAll('.qcArcLoad').forEach(btn=>{
-    btn.onclick=async()=>{
-      if(!confirm('현재 화면 내용을 이 기록으로 바꿀까? 저장하지 않은 현재 내용은 사라져.'))return;
-      const arc=archive.find(x=>x.id===btn.dataset.aid);
-      if(!arc)return;
-      qcColumns=JSON.parse(JSON.stringify(arc.columns));
-      qcUnits=JSON.parse(JSON.stringify(arc.units));
-      qcProject={name:arc.name||''};
-      await qcSave();
-      document.getElementById('qcArchivePanel').classList.remove('open');
-      qcRender();
-    };
-  });
-  list.querySelectorAll('.qcArcDel').forEach(btn=>{
-    btn.onclick=async()=>{
-      if(!confirm('이 저장 기록을 삭제할까? 되돌릴 수 없어.'))return;
-      await sb.from('qc_tracker_archive').delete().eq('id',btn.dataset.aid);
-      qcRenderArchivePanel();
-    };
-  });
+  el.innerHTML=`
+    <div class="itp-head">ITP 번호대장</div>
+    <div class="itp-sub">LTTD-연도-K순번 형식으로 번호를 발급·관리해요. 순번은 연도가 바뀌면 K001부터 다시 시작돼요.</div>
+    <div class="itp-issue-card">
+      <div class="itp-issue-row">
+        <select class="itp-select" id="itp-new-year">${yearOpts}</select>
+        <input type="text" id="itp-new-item" class="itp-input" placeholder="품목·프로젝트명 (선택)">
+        <input type="text" id="itp-new-note" class="itp-input" placeholder="비고 (선택)">
+        <button class="itp-btn" id="itp-issue-btn" onclick="itpIssue()">번호 발급</button>
+      </div>
+      <div class="itp-preview">다음 번호 (${previewYear}년): ${itpFullNo(previewYear,previewSeq)}</div>
+    </div>
+    <div class="itp-list-head"><h3>발급 내역</h3><span class="itp-count">총 ${itpNumbers.length}건</span></div>
+    <div class="itp-list">${rows||'<div class="kempty">아직 발급된 번호가 없어요.</div>'}</div>`;
+  const yearSel=document.getElementById('itp-new-year');
+  if(yearSel)yearSel.onchange=()=>{
+    const y=parseInt(yearSel.value,10);
+    const prevEl=el.querySelector('.itp-preview');
+    if(prevEl)prevEl.textContent=`다음 번호 (${y}년): ${itpFullNo(y,itpNextSeq(y))}`;
+  };
 }
-function qcAttachEvents(){
-  document.getElementById('qcProjName').onchange=(e)=>{
-    qcProject.name=e.target.value.trim();
-    qcSave();
-    qcRenderProjectSelect();
-  };
-  document.getElementById('qcProjectSelect').onchange=(e)=>qcSwitchProject(e.target.value);
-  document.getElementById('qcBtnAddProject').onclick=qcCreateProject;
-  document.getElementById('qcBtnDelProject').onclick=()=>qcDeleteProject(qcActiveId);
-  document.getElementById('qcBtnAddRows').onclick=()=>{qcUnits.push(qcNewUnit(''));qcSave();qcRender();};
-  document.getElementById('qcBtnTogglePaste').onclick=()=>{
-    document.getElementById('qcColPanel').classList.remove('open');
-    document.getElementById('qcArchivePanel').classList.remove('open');
-    document.getElementById('qcPastePanel').classList.toggle('open');
-  };
-  document.getElementById('qcBtnToggleCols').onclick=()=>{
-    document.getElementById('qcPastePanel').classList.remove('open');
-    document.getElementById('qcArchivePanel').classList.remove('open');
-    document.getElementById('qcColPanel').classList.toggle('open');
-  };
-  document.getElementById('qcBtnColDone').onclick=()=>document.getElementById('qcColPanel').classList.remove('open');
-  document.getElementById('qcBtnSaveArchive').onclick=qcSaveAndReset;
-  document.getElementById('qcBtnToggleArchive').onclick=()=>{
-    document.getElementById('qcPastePanel').classList.remove('open');
-    document.getElementById('qcColPanel').classList.remove('open');
-    const panel=document.getElementById('qcArchivePanel');
-    panel.classList.toggle('open');
-    if(panel.classList.contains('open'))qcRenderArchivePanel();
-  };
-  document.getElementById('qcBtnArchiveDone').onclick=()=>document.getElementById('qcArchivePanel').classList.remove('open');
-  document.getElementById('qcBtnPasteCancel').onclick=()=>{document.getElementById('qcPastePanel').classList.remove('open');document.getElementById('qcPasteArea').value='';};
-  document.getElementById('qcBtnPasteConfirm').onclick=()=>{
-    const raw=document.getElementById('qcPasteArea').value;
-    const names=raw.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
-    names.forEach(n=>qcUnits.push(qcNewUnit(n)));
-    document.getElementById('qcPasteArea').value='';
-    document.getElementById('qcPastePanel').classList.remove('open');
-    qcSave();qcRender();
-  };
-  document.getElementById('qcBtnAddCol').onclick=()=>{
-    const inp=document.getElementById('qcNewColName');
-    const name=inp.value.trim();
-    if(!name)return;
-    const cat=document.getElementById('qcNewColCat').value;
-    qcColumns.push({id:uid(),name,category:cat});
-    qcUnits.forEach(u=>u.tests.push(0));
-    inp.value='';
-    qcSave();qcRender();
-  };
-  document.querySelectorAll('#qc-view button.tab').forEach(btn=>{
-    btn.onclick=()=>{
-      document.querySelectorAll('#qc-view button.tab').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      qcFilterCat=btn.dataset.filter;
-      qcRender();
-    };
-  });
-  document.getElementById('qcBtnExportCsv').onclick=()=>{
-    const header=['호기','용량',...qcColumns.map(c=>c.name+`(${c.category==='type'?'타입':'루틴'})`),'완료'].join(',');
-    const labelFor=(u,ci)=>u.tests[ci]===1?'완료':(qcIsEffDone(u,ci)?'적용(동일타입)':'미완료');
-    const rows=qcUnits.map(u=>{
-      const doneCnt=qcColumns.reduce((a,_,ci)=>a+(qcIsEffDone(u,ci)?1:0),0);
-      return [u.no,u.capacity,...qcColumns.map((_,ci)=>labelFor(u,ci)),`${doneCnt}/${qcColumns.length}`].join(',');
-    });
-    const meta=`${qcProject.name||''}`;
-    const csv='\uFEFF'+[`프로젝트,${meta}`,header,...rows].join('\n');
-    qcDownloadBlob(csv,'text/csv;charset=utf-8','test_tracker_'+qcToday()+'.csv');
-  };
-  document.getElementById('qcBtnExportJson').onclick=()=>{
-    qcDownloadBlob(JSON.stringify({columns:qcColumns,units:qcUnits,project:qcProject},null,2),'application/json','test_tracker_backup_'+qcToday()+'.json');
-  };
-  document.getElementById('qcBtnImportJson').onclick=()=>document.getElementById('qcFileImport').click();
-  document.getElementById('qcFileImport').onchange=(e)=>{
-    const file=e.target.files[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      try{
-        const data=JSON.parse(reader.result);
-        if(data&&Array.isArray(data.units)&&Array.isArray(data.columns)){
-          qcColumns=data.columns;
-          qcUnits=data.units.map((u,i)=>({id:u.id,no:(u.no!==undefined?u.no:String(i+1)),capacity:(u.capacity!==undefined?u.capacity:(u.sn!==undefined?u.sn:(u.name||''))),tests:u.tests||[],notes:u.notes||{}}));
-          qcProject=data.project||{name:''};
-          qcSave();qcRender();
-        }else{alert('올바른 백업 파일이 아니야.');}
-      }catch(err){alert('파일을 읽는 중 오류가 발생했어.');}
-    };
-    reader.readAsText(file);
-    e.target.value='';
-  };
-  document.getElementById('qcBtnReset').onclick=()=>{
-    if(confirm('모든 호기와 체크 상태를 삭제할까? 시험 항목 구성은 유지돼. 이 작업은 되돌릴 수 없어.')){
-      qcUnits=[];qcSave();qcRender();
+async function itpIssue(){
+  const yearSel=document.getElementById('itp-new-year');
+  const year=yearSel?parseInt(yearSel.value,10):new Date().getFullYear();
+  const itemInp=document.getElementById('itp-new-item'),noteInp=document.getElementById('itp-new-note');
+  const item=(itemInp&&itemInp.value||'').trim();
+  const note=(noteInp&&noteInp.value||'').trim();
+  const btn=document.getElementById('itp-issue-btn');if(btn)btn.disabled=true;
+  const seq=itpNextSeq(year);
+  const {data:row,error}=await sb.from('itp_numbers').insert({year,seq,full_no:itpFullNo(year,seq),item_desc:item,note,created_by:profile.id}).select().single();
+  if(error){
+    console.error(error);
+    if(error.code==='23505'){
+      // 동시에 두 명이 같은 순번으로 발급 시도한 경우 — 최신 내역을 다시 받아서 한 번만 재시도
+      await itpLoad();
+      const retrySeq=itpNextSeq(year);
+      const {data:row2,error:err2}=await sb.from('itp_numbers').insert({year,seq:retrySeq,full_no:itpFullNo(year,retrySeq),item_desc:item,note,created_by:profile.id}).select().single();
+      if(err2){console.error(err2);alert('번호 발급 중 오류가 발생했어요. 다시 시도해주세요.');if(btn)btn.disabled=false;return;}
+      itpNumbers.unshift(row2);
+    }else{
+      alert('번호 발급 중 오류가 발생했어요. 다시 시도해주세요.');
+      if(btn)btn.disabled=false;return;
     }
-  };
+  }else{
+    itpNumbers.unshift(row);
+  }
+  if(btn)btn.disabled=false;
+  if(viewMode==='misc')miscRenderSection();
 }
-function qcDownloadBlob(content,type,filename){
-  const blob=new Blob([content],{type});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=filename;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-function qcToday(){
-  const d=new Date();
-  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+async function itpDeleteNumber(id){
+  if(!isLeader())return;
+  const t=itpNumbers.find(x=>x.id===id);if(!t)return;
+  if(!confirm(`${t.full_no} 번호를 삭제할까요? (이 번호는 다시 발급되지 않고 빈 번호로 남아요)`))return;
+  const idx=itpNumbers.findIndex(x=>x.id===id);if(idx<0)return;
+  const removed=itpNumbers[idx];
+  itpNumbers.splice(idx,1);if(viewMode==='misc')miscRenderSection();
+  const {error}=await sb.from('itp_numbers').delete().eq('id',id);
+  if(error){console.error(error);itpNumbers.splice(idx,0,removed);if(viewMode==='misc')miscRenderSection();alert('삭제 중 오류가 발생했어요. 다시 시도해주세요.');}
 }
 
 /* ═══════════ 사무용품 발주 탭 ═══════════ */
