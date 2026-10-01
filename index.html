@@ -339,6 +339,14 @@
   .acreate-in{flex:1;min-width:0;font-family:inherit;font-size:12.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);}
   .acreate-in:focus{outline:none;border-color:var(--accent);}
   .acreate-sel{font-family:inherit;font-size:12px;padding:8px 6px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);}
+  .acreate-btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:background .15s;flex-shrink:0;}
+  .acreate-btn:hover{background:var(--accent-deep);}
+  .acreate-hint{padding:0 10px 8px;font-size:10.5px;color:var(--ink-faint);line-height:1.4;}
+  .achip-row{display:flex;flex-wrap:wrap;gap:6px;padding:0 10px 10px;}
+  .achip{font-family:inherit;font-size:11.5px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);cursor:pointer;transition:all .15s;user-select:none;}
+  .achip:hover{border-color:var(--accent);color:var(--accent);}
+  .achip.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .agroup{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--accent-deep);background:var(--accent-tint);padding:2px 7px;border-radius:999px;white-space:nowrap;}
   .as-overall{padding:16px 18px 10px;}
   .as-bar{height:8px;border-radius:5px;background:var(--line-soft);overflow:hidden;margin-bottom:9px;}
   .as-bar-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .2s;}
@@ -832,8 +840,9 @@
     .brand h1{font-size:14px;}
     .brand .sub{display:none;}
     .top-right{gap:5px;margin-top:2px;}
-    /* 모바일 = 캘린더 전용 보기 모드: 탭 전환/입력성 버튼은 숨기고 조회만 가능하게 */
-    .seg{display:none;}
+    /* 모바일 = 캘린더(조회 전용) + 업무분장(조회·체크 전용) 탭만 지원, 나머지 탭/입력성 버튼은 숨김 */
+    .seg button{display:none;}
+    .seg #vt-cal,.seg #vt-assign{display:flex;}
     #report-btn,#leave-request-btn,#leave-bell-btn,#signup-bell-btn,#announce-btn,#help-btn,#settings-btn{display:none !important;}
     .clock{display:none;}
     #user-badge{font-size:10px;}
@@ -843,7 +852,15 @@
 
     /* 프로젝트 필터/가져오기·내보내기 바 전체 숨김 — 캘린더 가로 폭을 최대한 확보 */
     .controls{display:none !important;}
-    #todo-panel{display:none !important;}
+    body:not([data-view="assign"]) #todo-panel{display:none !important;}
+
+    /* 업무분장 탭: 모바일에서는 조회·완료체크만 — 생성/배정(드래그)/삭제는 숨김 */
+    body[data-view="assign"] .acreate,
+    body[data-view="assign"] .acreate-hint,
+    body[data-view="assign"] .adel,
+    body[data-view="assign"] .achip-row{display:none !important;}
+    body[data-view="assign"] .kanban{grid-auto-flow:row;grid-auto-columns:unset;grid-template-columns:1fr;}
+    body[data-view="assign"] #todo-panel{order:-1;}
 
     .cal-head{padding:6px 8px;gap:5px;}
     .cal-title{font-size:14px;}
@@ -1574,9 +1591,10 @@ function setView(v){
   if(tier==='supplies'){v='supplies';}
   else{
     if(v==='leave'||v==='stat')v='calendar';
-    if(isMobileCal())v='calendar'; // 모바일은 캘린더 전용 보기
+    if(isMobileCal()&&v!=='calendar'&&v!=='assign')v='calendar'; // 모바일은 캘린더 + 업무분장(조회·체크 전용)만 지원
   }
   viewMode=v;
+  document.body.setAttribute('data-view',v);
   document.getElementById('vt-cal').classList.toggle('on',v==='calendar');
   document.getElementById('vt-assign').classList.toggle('on',v==='assign');
   document.getElementById('vt-note').classList.toggle('on',v==='note');
@@ -1590,7 +1608,7 @@ function renderAll(){
   if(viewMode==='supplies'||viewMode==='misc'||viewMode==='wr'||viewMode==='assign'){ if(ctrlBar)ctrlBar.style.display='none'; }
   else{ if(ctrlBar)ctrlBar.style.display=''; renderProjectBar(); }
   const layout=document.getElementById('layout'),tp=document.getElementById('todo-panel');
-  if(viewMode==='assign'){layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';assignRenderShell();}
+  if(viewMode==='assign'){layout.classList.remove('kanban-mode');tp.style.display='';assignRenderShell();}
   else if(viewMode==='leave'){layout.classList.add('kanban-mode');tp.style.display='none';renderLeaveView();}
   else if(viewMode==='note'){layout.classList.add('kanban-mode');tp.style.display='none';renderNotesView();}
   else if(viewMode==='stat'){layout.classList.add('kanban-mode');tp.style.display='none';renderStatsView();}
@@ -2527,9 +2545,11 @@ function assignCardHtml(t,assigned){
   const checkbox=canCheck?`<span class="acheck" onclick="event.stopPropagation();assignComplete('${t.id}')" title="완료 처리">✓</span>`:'';
   const del=isLeader()?`<span class="adel" onclick="event.stopPropagation();assignDeleteTask('${t.id}')" title="삭제">✕</span>`:'';
   const dragAttrs=isLeader()?`draggable="true" ondragstart="assignDragStart(event,'${t.id}')" ondragend="dragEnd(event)"`:'';
+  const groupCount=t.group_id?assignTasks.filter(x=>x.group_id===t.group_id).length:1;
+  const groupBadge=groupCount>1?`<span class="agroup" title="같은 업무가 ${groupCount}명에게 배정됨 — 각자 따로 완료 체크해요">👥 ${groupCount}</span>`:'';
   return `<div class="kcard acard" ${dragAttrs}>
     <div class="ktxt">${esc(t.text)}</div>
-    <div class="kmeta"><span class="pill ${p.cls}">${p.lbl}</span><span class="aicons">${checkbox}${del}</span></div>
+    <div class="kmeta"><span class="pill ${p.cls}">${p.lbl}</span>${groupBadge}<span class="aicons">${checkbox}${del}</span></div>
   </div>`;
 }
 function assignRenderShell(){
@@ -2545,12 +2565,16 @@ function assignRenderShell(){
   }).join('');
   const poolBody=poolTasks.length?poolTasks.map(t=>assignCardHtml(t,false)).join(''):`<div class="kempty">대기 중인 업무 없음</div>`;
   const poolDropAttrs=isLeader()?`ondragover="assignAllowDrop(event,this)" ondragleave="this.classList.remove('drop')" ondrop="assignDrop(event,null)"`:'';
+  const chipsHtml=people.map(p=>`<span class="achip" data-pid="${p.id}" onclick="this.classList.toggle('on')">${esc(p.name)}</span>`).join('');
   const poolCol=`<div class="kcol pool" ${poolDropAttrs}>
     <div class="kcol-head"><span class="name">+ 할일 생성</span><span class="kc">${poolTasks.length}</span></div>
     ${isLeader()?`<div class="acreate">
       <input type="text" id="assign-new-text" class="acreate-in" placeholder="할일 입력 후 Enter" onkeydown="if(event.key==='Enter')assignAddTask()">
       <select id="assign-new-prio" class="acreate-sel"><option value="high">높음</option><option value="mid" selected>중간</option><option value="low">낮음</option></select>
-    </div>`:''}
+      <button class="acreate-btn" onclick="assignAddTask()">추가</button>
+    </div>
+    <div class="acreate-hint">담당자를 고르면 바로 배정, 안 고르면 대기 풀로 들어가요. 여러 명 고르면 각자에게 똑같이 배정돼요.</div>
+    <div class="achip-row" id="assign-new-assignees">${chipsHtml}</div>`:''}
     <div class="kcol-body">${poolBody}</div></div>`;
   if(!people.length&&!poolTasks.length&&!isLeader()){
     document.getElementById('main-panel').innerHTML=`<div class="kempty" style="padding:40px;">아직 배정된 업무가 없어요.</div>`;
@@ -2620,9 +2644,18 @@ async function assignComplete(id){
   const t=assignTasks.find(x=>x.id===id);if(!t)return;
   if(!isLeader()&&t.assignee!==profile.id)return;
   const prevStatus=t.status,prevDoneAt=t.done_at;
-  t.status='done';t.done_at=new Date().toISOString();assignRenderShell();
+  // 같은 업무를 여러 명에게 배정한 경우(group_id 공유) 한 명이 체크하면 나머지 사본은 전부
+  // 사라지고, 체크한 사람의 사본만 완료 기록으로 남는다.
+  const siblings=t.group_id?assignTasks.filter(x=>x.group_id===t.group_id&&x.id!==t.id):[];
+  t.status='done';t.done_at=new Date().toISOString();
+  if(siblings.length)assignTasks=assignTasks.filter(x=>x.group_id!==t.group_id||x.id===t.id);
+  assignRenderShell();
   const {error}=await sb.from('assign_tasks').update({status:'done',done_at:t.done_at,updated_by:profile.id}).eq('id',id);
-  if(error){console.error(error);t.status=prevStatus;t.done_at=prevDoneAt;assignRenderShell();alert('완료 처리 중 오류가 발생했어요. 다시 시도해주세요.');}
+  if(error){console.error(error);t.status=prevStatus;t.done_at=prevDoneAt;if(siblings.length)assignTasks.push(...siblings);assignRenderShell();alert('완료 처리 중 오류가 발생했어요. 다시 시도해주세요.');return;}
+  if(siblings.length){
+    const {error:delErr}=await sb.from('assign_tasks').delete().in('id',siblings.map(s=>s.id));
+    if(delErr)console.error(delErr);
+  }
 }
 async function assignAddTask(){
   if(!isLeader())return;
@@ -2630,10 +2663,15 @@ async function assignAddTask(){
   if(!inp)return;
   const text=(inp.value||'').trim();if(!text)return;
   const priority=sel?sel.value:'mid';
+  const chipRow=document.getElementById('assign-new-assignees');
+  const selectedIds=chipRow?Array.from(chipRow.querySelectorAll('.achip.on')).map(c=>c.dataset.pid):[];
   inp.disabled=true;
-  const {data:row,error}=await sb.from('assign_tasks').insert({text,priority,created_by:profile.id,updated_by:profile.id}).select().single();
-  if(error){console.error(error);alert('업무 생성 중 오류가 발생했어요. 다시 시도해주세요.');if(inp){inp.disabled=false;}return;}
-  assignTasks.push(row);
+  const groupId=selectedIds.length>1?((window.crypto&&crypto.randomUUID)?crypto.randomUUID():uid()):null;
+  const baseRow={text,priority,created_by:profile.id,updated_by:profile.id};
+  const payload=selectedIds.length?selectedIds.map(pid=>({...baseRow,assignee:pid,group_id:groupId})):[baseRow];
+  const {data:rows,error}=await sb.from('assign_tasks').insert(payload).select();
+  if(error){console.error(error);alert('업무 생성 중 오류가 발생했어요. 다시 시도해주세요.');inp.disabled=false;return;}
+  assignTasks.push(...(rows||[]));
   assignRenderShell();
   const freshInp=document.getElementById('assign-new-text');if(freshInp)freshInp.focus();
 }
