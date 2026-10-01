@@ -134,7 +134,7 @@
   /* ── layout ── */
   .layout{display:grid;grid-template-columns:1fr 348px;gap:18px;align-items:start;}
   .layout.kanban-mode{grid-template-columns:1fr;}
-  @media(max-width:900px){.layout{grid-template-columns:1fr;}}
+  @media(max-width:900px),(pointer:coarse){.layout{grid-template-columns:1fr;}}
   .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
 
   /* ── calendar header ── */
@@ -901,7 +901,7 @@
 @media (max-width:640px) {
     #supply-view .field.w-40{ flex:1 1 100%; }
 }
-  @media(max-width:700px){
+  @media(max-width:700px),(pointer:coarse){
     /* 모바일 전용 — 데스크탑 기본값보다 뒤에 와야 우선 적용됨 */
     .topbar{gap:6px;margin:0 0 8px;}
     .brand{gap:6px;}
@@ -919,25 +919,21 @@
     .demo-role-switch{padding:2px;}
     .demo-role-btn{font-size:11px;padding:6px 8px;}
 
-    .controls{gap:6px;margin-bottom:8px;flex-wrap:nowrap;}
-    .proj-bar{flex:1;min-width:0;flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;padding-bottom:1px;}
-    .proj-bar::-webkit-scrollbar{display:none;}
-    .proj-bar .chip{flex-shrink:0;}
-    .chip{font-size:11.5px;padding:6px 9px;}
-    .io-btns{display:none;}
+    /* 프로젝트 필터/가져오기·내보내기 바 전체 숨김 — 캘린더 가로 폭을 최대한 확보 */
+    .controls{display:none !important;}
     #todo-panel{display:none !important;}
 
-    .cal-head{padding:8px 10px;gap:6px;}
-    .cal-title{font-size:15px;}
-    .cal-body{padding:0 8px 12px;gap:5px;}
-    .week{gap:5px;}
-    .cell{padding:5px 6px;border-radius:8px;}
-    .cell .dnum{font-size:12.5px;}
-    .ebar{height:33px;line-height:1.25;font-size:11px;padding:3px 6px;border-radius:5px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;word-break:break-all;}
+    .cal-head{padding:6px 8px;gap:5px;}
+    .cal-title{font-size:14px;}
+    .cal-body{padding:0 4px 8px;gap:3px;}
+    .week{gap:3px;}
+    .cell{padding:3px 4px;border-radius:6px;}
+    .cell .dnum{font-size:10.5px;}
+    .ebar{height:27px;line-height:1.15;font-size:9.5px;padding:2px 4px;border-radius:4px;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;word-break:break-all;}
     .ebar .bc{display:none;}
-    .hol-lbl{position:static;display:block;max-width:100%;margin:2px 0 0;padding:2px 4px;font-size:10px;line-height:1.35;}
-    .cal-title{gap:5px;}
-    .cal-title .mo{font-size:18px;}
+    .hol-lbl{position:static;display:block;max-width:100%;margin:1px 0 0;padding:1px 3px;font-size:9px;line-height:1.3;}
+    .cal-title{gap:4px;}
+    .cal-title .mo{font-size:16px;}
     .cal-actions{gap:5px;}
     .cal-actions button{padding:6px 8px;font-size:0;gap:0;}
     .cal-actions button:nth-child(2){font-size:12.5px;gap:5px;padding:7px 12px;}
@@ -1536,7 +1532,7 @@ const STATUS=[{id:'todo',lbl:'대기',color:'var(--st-todo)'},{id:'doing',lbl:'�
 const STMAP=Object.fromEntries(STATUS.map(s=>[s.id,s]));
 const WD=['일','월','화','수','목','금','토'];
 const GAP=7;
-function isMobileCal(){return window.innerWidth<=700;}
+function isMobileCal(){return window.innerWidth<=700||(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches);}
 /* ── 휴가 종류 ── bucket:'annual'은 연차에서 차감, 'other'는 별도 집계 ── */
 const DAILY_HOURS=8;
 const LEAVE_KINDS=[
@@ -2346,7 +2342,8 @@ function renderCal(){
     <div class="cal-body">${weeksHtml}</div>`;
 }
 function renderWeek(weekStart,curMonth){
-  const HEADER=26, BARH=isMobileCal()?36:22;
+  const HEADER=isMobileCal()?20:26, BARH=isMobileCal()?29:22;
+  const GAP=isMobileCal()?3:7; // CSS .week gap과 맞춰 바 위치 계산 (모바일에서 좁은 간격 반영)
   const wsNum=dayNum(ymd(weekStart)), weNum=wsNum+6;
   let segs=[];
   data.events.forEach(e=>{
@@ -2359,7 +2356,7 @@ function renderWeek(weekStart,curMonth){
   const lanes=[];
   segs.forEach(sg=>{let placed=false;for(let i=0;i<lanes.length;i++){if(lanes[i].every(o=>sg.endCol<o.s||sg.startCol>o.e)){lanes[i].push({s:sg.startCol,e:sg.endCol});sg.lane=i;placed=true;break;}}if(!placed){sg.lane=lanes.length;lanes.push([{s:sg.startCol,e:sg.endCol}]);}});
   const shown=lanes.length; // 칸 수 제한 없이 겹치는 일정 전부 표시 (연속 기간을 한눈에 보기 위함)
-  const h=Math.max(94,HEADER+shown*BARH+10);
+  const h=Math.max(isMobileCal()?64:94,HEADER+shown*BARH+10);
   let cells='';
   for(let c=0;c<7;c++){
     const d=new Date(weekStart);d.setDate(weekStart.getDate()+c);
