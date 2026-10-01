@@ -100,11 +100,10 @@
   .chip.toggle-archived{border-style:dashed;color:var(--ink-soft);background:transparent;box-shadow:none;font-size:12px;}
   .chip.add:hover{color:var(--accent);}
   .io-btns{display:flex;gap:7px;}
-  /* ── 역할별 화면 제어 (팀원: 캘린더 조작·칸반·집계 숨김) ── */
-  body[data-role="member"] #vt-kan,
+  /* ── 역할별 화면 제어 (팀원: 캘린더 조작·집계 숨김 / 업무분장은 팀원도 볼 수 있음) ── */
   body[data-role="member"] #imp-wrap,body[data-role="member"] .btn-primary,
   body[data-role="member"] .proj-bar .chip.add,body[data-role="member"] .proj-bar .edit{display:none !important;}
-  body[data-role="supplies"] #vt-cal,body[data-role="supplies"] #vt-kan,body[data-role="supplies"] #vt-note,
+  body[data-role="supplies"] #vt-cal,body[data-role="supplies"] #vt-assign,body[data-role="supplies"] #vt-note,
   body[data-role="supplies"] #vt-qc,body[data-role="supplies"] #vt-wr,body[data-role="supplies"] #leave-bell-btn,body[data-role="supplies"] #signup-bell-btn,
   body[data-role="supplies"] #leave-request-btn,body[data-role="supplies"] .controls{display:none !important;}
   body[data-role="leader"] #leave-request-btn{display:none !important;}
@@ -310,11 +309,11 @@
   .src{font-size:10.5px;color:var(--ink-faint);display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:500;}
   .src .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;} .src:hover{color:var(--accent);}
 
-  /* ── kanban ── */
-  .kanban{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:16px;}
-  @media(max-width:900px){.kanban{grid-template-columns:repeat(4,minmax(230px,1fr));overflow-x:auto;}}
+  /* ── 업무 분장 보드 (구 칸반) ── */
+  .kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:14px;padding:16px;overflow-x:auto;}
   .kcol{background:var(--cell-bg);border:1px solid var(--line-soft);border-radius:var(--r);display:flex;flex-direction:column;min-height:200px;transition:all .15s;}
   .kcol.drop{background:var(--accent-soft);border-color:var(--accent);border-style:dashed;}
+  .kcol.pool{border-style:dashed;}
   .kcol-head{padding:13px 15px;border-bottom:1px solid var(--line-soft);display:flex;align-items:center;gap:9px;}
   .kcol-head .sdot{width:10px;height:10px;border-radius:50%;}
   .kcol-head .name{font-size:13.5px;font-weight:700;}
@@ -328,6 +327,29 @@
   .kcard .ksrc{font-size:10.5px;color:var(--ink-faint);display:flex;align-items:center;gap:5px;width:100%;margin-top:7px;font-weight:500;}
   .kcard .ksrc .dot{width:7px;height:7px;border-radius:50%;}
   .kempty{text-align:center;color:var(--ink-faint);font-size:11.5px;padding:22px 8px;opacity:.6;}
+  .kcard.acard{border-left-color:var(--line);cursor:default;}
+  .kcard.acard[draggable="true"]{cursor:grab;}
+  .acard .aicons{margin-left:auto;display:flex;gap:6px;}
+  .acheck,.adel{width:22px;height:22px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;flex-shrink:0;}
+  .acheck{background:var(--accent-tint);color:var(--accent-deep);}
+  .acheck:hover{background:var(--accent);color:#fff;}
+  .adel{background:var(--line-soft);color:var(--ink-faint);}
+  .adel:hover{background:var(--hi);color:#fff;}
+  .acreate{padding:0 10px 10px;display:flex;gap:6px;}
+  .acreate-in{flex:1;min-width:0;font-family:inherit;font-size:12.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);}
+  .acreate-in:focus{outline:none;border-color:var(--accent);}
+  .acreate-sel{font-family:inherit;font-size:12px;padding:8px 6px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);}
+  .as-overall{padding:16px 18px 10px;}
+  .as-bar{height:8px;border-radius:5px;background:var(--line-soft);overflow:hidden;margin-bottom:9px;}
+  .as-bar-fill{height:100%;background:var(--accent);border-radius:5px;transition:width .2s;}
+  .as-overall-txt{font-size:12px;color:var(--ink-soft);margin-bottom:3px;}
+  .as-overall-txt .mono{font-family:var(--mono);color:var(--ink-faint);}
+  .as-people{padding:4px 18px 18px;}
+  .as-prow{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);}
+  .as-prow:first-of-type{border-top:none;}
+  .as-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .as-name{font-size:13px;font-weight:600;flex:1;}
+  .as-nums{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
 
   /* ── modal ── */
   .scrim{position:fixed;inset:0;background:rgba(24,28,32,.46);backdrop-filter:blur(3px);display:none;align-items:flex-start;justify-content:center;padding:44px 18px;z-index:50;overflow-y:auto;}
@@ -985,7 +1007,7 @@
     <div class="top-right">
       <div class="seg">
         <button id="vt-cal" class="on" onclick="setView('calendar')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>캘린더</button>
-        <button id="vt-kan" onclick="setView('kanban')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="6" height="18" rx="1.5"/><rect x="10" y="3" width="6" height="12" rx="1.5"/><rect x="17" y="3" width="4" height="8" rx="1.5"/></svg>칸반</button>
+        <button id="vt-assign" onclick="setView('assign')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>업무분장</button>
         <button id="vt-note" onclick="setView('note')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M15 3v4h4M8 11h8M8 15h6"/></svg>메모</button>
         <button id="vt-qc" onclick="setView('qc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>시험관리</button>
         <button id="vt-supplies" onclick="setView('supplies')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>발주</button>
@@ -1177,7 +1199,7 @@ async function afterLogin(){
     // 사무용품 계정은 발주 탭 외 데이터를 조회할 필요가 없음 — 불필요한 조회 최소화
     await Promise.all([loadProfilesMap(),supplyLoadState()]);
   }else{
-    const loaders=[loadProfilesMap(),loadAll(),loadLeaveRequests(),qcLoadData(),supplyLoadState(),wrInitLoad()];
+    const loaders=[loadProfilesMap(),loadAll(),loadLeaveRequests(),qcLoadData(),supplyLoadState(),wrInitLoad(),assignLoad()];
     if(isLeader())loaders.push(loadPendingSignups());
     await Promise.all(loaders);
   }
@@ -1186,7 +1208,7 @@ async function afterLogin(){
   checkShowAnnouncement();
 }
 async function loadProfilesMap(){
-  const {data:rows}=await sb.from('profiles').select('id,name,role');
+  const {data:rows}=await sb.from('profiles').select('id,name,role,approved');
   profilesMap={};(rows||[]).forEach(r=>profilesMap[r.id]=r);
 }
 async function loadAll(){
@@ -1228,6 +1250,8 @@ function subscribeRealtime(){
     sb.channel('profiles_ch').on('postgres_changes',{event:'*',schema:'public',table:'profiles'},async()=>{
       await loadPendingSignups();
       renderSignupBellModal();
+      await loadProfilesMap();
+      if(viewMode==='assign')assignRenderShell();
     }).subscribe();
   }
   sb.channel('qc_tracker_ch').on('postgres_changes',{event:'*',schema:'public',table:'qc_tracker_data'},payload=>{
@@ -1257,6 +1281,12 @@ function subscribeRealtime(){
     if(wrPendingSave || wrSaveT)return; // 내가 편집 중(저장 대기 중)이면 원격 변경으로 덮어쓰지 않음
     await wrLoadReport(wrWeekStart);
     if(viewMode==='wr')wrRenderShell();
+  }).subscribe();
+  sb.channel('assign_tasks_ch').on('postgres_changes',{event:'*',schema:'public',table:'assign_tasks'},async(payload)=>{
+    const changedBy=(payload.new&&payload.new.updated_by)||(payload.old&&payload.old.updated_by);
+    if(payload.eventType!=='DELETE' && changedBy===profile.id)return;
+    await assignLoad();
+    if(viewMode==='assign')assignRenderShell();
   }).subscribe();
 }
 async function loadLeaveRequests(){
@@ -1646,12 +1676,11 @@ function setView(v){
   if(tier==='supplies'){v='supplies';}
   else{
     if(v==='leave'||v==='stat')v='calendar';
-    if(!isLeader()&&v==='kanban')v='calendar';
     if(isMobileCal())v='calendar'; // 모바일은 캘린더 전용 보기
   }
   viewMode=v;
   document.getElementById('vt-cal').classList.toggle('on',v==='calendar');
-  document.getElementById('vt-kan').classList.toggle('on',v==='kanban');
+  document.getElementById('vt-assign').classList.toggle('on',v==='assign');
   document.getElementById('vt-note').classList.toggle('on',v==='note');
   document.getElementById('vt-qc').classList.toggle('on',v==='qc');
   document.getElementById('vt-supplies').classList.toggle('on',v==='supplies');
@@ -1660,10 +1689,10 @@ function setView(v){
 }
 function renderAll(){
   const ctrlBar=document.getElementById('controls-bar');
-  if(viewMode==='supplies'||viewMode==='qc'||viewMode==='wr'){ if(ctrlBar)ctrlBar.style.display='none'; }
+  if(viewMode==='supplies'||viewMode==='qc'||viewMode==='wr'||viewMode==='assign'){ if(ctrlBar)ctrlBar.style.display='none'; }
   else{ if(ctrlBar)ctrlBar.style.display=''; renderProjectBar(); }
   const layout=document.getElementById('layout'),tp=document.getElementById('todo-panel');
-  if(viewMode==='kanban'){layout.classList.add('kanban-mode');tp.style.display='none';renderKanban();}
+  if(viewMode==='assign'){layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';assignRenderShell();}
   else if(viewMode==='leave'){layout.classList.add('kanban-mode');tp.style.display='none';renderLeaveView();}
   else if(viewMode==='note'){layout.classList.add('kanban-mode');tp.style.display='none';renderNotesView();}
   else if(viewMode==='stat'){layout.classList.add('kanban-mode');tp.style.display='none';renderStatsView();}
@@ -1672,7 +1701,7 @@ function renderAll(){
   else if(viewMode==='wr'){layout.classList.add('kanban-mode');tp.style.display='none';wrRenderShell();}
   else{layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';renderCal();renderTodos();}
 }
-function refreshBg(){if(viewMode==='kanban')renderKanban();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='qc')qcRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='qc'&&viewMode!=='wr')renderProjectBar();}
+function refreshBg(){if(viewMode==='assign')assignRenderShell();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='qc')qcRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='qc'&&viewMode!=='wr'&&viewMode!=='assign')renderProjectBar();}
 
 let showArchivedProj=false;
 function renderProjectBar(){
@@ -2585,29 +2614,123 @@ function renderTodos(){
 function setFilter(f){filter=f;renderTodos();}
 function setSort(s){todoSort=s;renderTodos();}
 
-/* kanban */
-function renderKanban(){
-  const items=collectTodos();
-  let cols=STATUS.map(st=>{
-    const cards=items.filter(t=>t.status===st.id).sort((a,b)=>{const dc=(a.due||'').localeCompare(b.due||'');if(dc)return dc;return PRIO[a.priority].rank-PRIO[b.priority].rank;});
-    const body=cards.length?cards.map(t=>{const p=PRIO[t.priority],dd=dday(t.evObj);
-      const ddHtml=st.id!=='done'?`<span class="dday ${dd.cls}">${dd.txt}</span>`:'';
-      return `<div class="kcard" draggable="true" style="border-left-color:${projColor(t.projectId)}" ondragstart="dragStart(event,'${t.evId}','${t.id}')" ondragend="dragEnd(event)" onclick="openEvent('${t.evId}')">
-        <div class="ktxt">${esc(t.text)}</div><div class="kmeta"><span class="pill ${p.cls}">${p.lbl}</span>${ddHtml}</div>
-        <div class="ksrc"><span class="dot" style="background:${projColor(t.projectId)}"></span>${esc(t.evTitle)}</div></div>`;}).join(''):`<div class="kempty">없음</div>`;
-    return `<div class="kcol" data-st="${st.id}" ondragover="allowDrop(event,this)" ondragleave="this.classList.remove('drop')" ondrop="dropCard(event,this)">
-      <div class="kcol-head"><span class="sdot" style="background:${st.color}"></span><span class="name">${st.lbl}</span><span class="kc">${cards.length}</span></div>
-      <div class="kcol-body">${body}</div></div>`;}).join('');
-  document.getElementById('main-panel').innerHTML=`<div class="kanban">${cols}</div>`;
+/* 업무 분장 (팀원별 할일 배정 보드) */
+let assignTasks=[], assignDragId=null;
+function getAssignPeople(){return Object.values(profilesMap).filter(p=>p.approved&&p.role!=='사무용품').sort((a,b)=>(a.name||'').localeCompare(b.name||''));}
+function personColor(id){let h=0;for(let i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return PALETTE[h%PALETTE.length].hex;}
+async function assignLoad(){
+  const {data:rows,error}=await sb.from('assign_tasks').select('*').order('created_at',{ascending:true});
+  if(error){console.error(error);assignTasks=[];return;}
+  assignTasks=rows||[];
 }
-let dragRef=null;
-function dragStart(ev,evId,tId){dragRef={evId,tId};ev.currentTarget.classList.add('dragging');ev.dataTransfer.effectAllowed='move';}
+function assignCardHtml(t,assigned){
+  const p=PRIO[t.priority]||PRIO.mid;
+  const canCheck=assigned&&(isLeader()||t.assignee===profile.id);
+  const checkbox=canCheck?`<span class="acheck" onclick="event.stopPropagation();assignComplete('${t.id}')" title="완료 처리">✓</span>`:'';
+  const del=isLeader()?`<span class="adel" onclick="event.stopPropagation();assignDeleteTask('${t.id}')" title="삭제">✕</span>`:'';
+  const dragAttrs=isLeader()?`draggable="true" ondragstart="assignDragStart(event,'${t.id}')" ondragend="dragEnd(event)"`:'';
+  return `<div class="kcard acard" ${dragAttrs}>
+    <div class="ktxt">${esc(t.text)}</div>
+    <div class="kmeta"><span class="pill ${p.cls}">${p.lbl}</span><span class="aicons">${checkbox}${del}</span></div>
+  </div>`;
+}
+function assignRenderShell(){
+  const people=getAssignPeople();
+  const poolTasks=assignTasks.filter(t=>!t.assignee&&t.status==='open').sort((a,b)=>PRIO[a.priority].rank-PRIO[b.priority].rank||(a.created_at||'').localeCompare(b.created_at||''));
+  const cols=people.map(p=>{
+    const mine=assignTasks.filter(t=>t.assignee===p.id&&t.status==='open').sort((a,b)=>PRIO[a.priority].rank-PRIO[b.priority].rank||(a.created_at||'').localeCompare(b.created_at||''));
+    const body=mine.length?mine.map(t=>assignCardHtml(t,true)).join(''):`<div class="kempty">배정된 업무 없음</div>`;
+    const dropAttrs=isLeader()?`ondragover="assignAllowDrop(event,this)" ondragleave="this.classList.remove('drop')" ondrop="assignDrop(event,'${p.id}')"`:'';
+    return `<div class="kcol" ${dropAttrs}>
+      <div class="kcol-head"><span class="sdot" style="background:${personColor(p.id)}"></span><span class="name">${esc(p.name)}</span><span class="kc">${mine.length}</span></div>
+      <div class="kcol-body">${body}</div></div>`;
+  }).join('');
+  const poolBody=poolTasks.length?poolTasks.map(t=>assignCardHtml(t,false)).join(''):`<div class="kempty">대기 중인 업무 없음</div>`;
+  const poolDropAttrs=isLeader()?`ondragover="assignAllowDrop(event,this)" ondragleave="this.classList.remove('drop')" ondrop="assignDrop(event,null)"`:'';
+  const poolCol=`<div class="kcol pool" ${poolDropAttrs}>
+    <div class="kcol-head"><span class="name">+ 할일 생성</span><span class="kc">${poolTasks.length}</span></div>
+    ${isLeader()?`<div class="acreate">
+      <input type="text" id="assign-new-text" class="acreate-in" placeholder="할일 입력 후 Enter" onkeydown="if(event.key==='Enter')assignAddTask()">
+      <select id="assign-new-prio" class="acreate-sel"><option value="high">높음</option><option value="mid" selected>중간</option><option value="low">낮음</option></select>
+    </div>`:''}
+    <div class="kcol-body">${poolBody}</div></div>`;
+  if(!people.length&&!poolTasks.length&&!isLeader()){
+    document.getElementById('main-panel').innerHTML=`<div class="kempty" style="padding:40px;">아직 배정된 업무가 없어요.</div>`;
+  }else{
+    document.getElementById('main-panel').innerHTML=`<div class="kanban assign-board">${cols}${poolCol}</div>`;
+  }
+  renderAssignStats();
+}
+function renderAssignStats(){
+  const tp=document.getElementById('todo-panel');if(!tp)return;
+  const people=getAssignPeople();
+  const total=assignTasks.length, doneCnt=assignTasks.filter(t=>t.status==='done').length, openCnt=total-doneCnt;
+  const pct=total?Math.round(doneCnt/total*100):0;
+  const poolCnt=assignTasks.filter(t=>!t.assignee&&t.status==='open').length;
+  const rows=people.map(p=>{
+    const mineOpen=assignTasks.filter(t=>t.assignee===p.id&&t.status==='open').length;
+    const mineDone=assignTasks.filter(t=>t.assignee===p.id&&t.status==='done').length;
+    return {p,mineOpen,mineDone};
+  }).sort((a,b)=>b.mineDone-a.mineDone||b.mineOpen-a.mineOpen);
+  const prows=rows.map(({p,mineOpen,mineDone})=>`
+    <div class="as-prow"><span class="as-dot" style="background:${personColor(p.id)}"></span>
+      <span class="as-name">${esc(p.name)}</span>
+      <span class="as-nums">진행 ${mineOpen} · 완료 ${mineDone}</span></div>`).join('');
+  tp.innerHTML=`
+    <div class="tp-head"><div class="tp-top"><h2>업무 현황</h2></div></div>
+    <div class="as-overall">
+      <div class="as-bar"><div class="as-bar-fill" style="width:${pct}%"></div></div>
+      <div class="as-overall-txt">전체 ${total}건 · 완료 ${doneCnt} · 진행중 ${openCnt} <span class="mono">(${pct}%)</span></div>
+      <div class="as-overall-txt">미배정 대기 ${poolCnt}건</div>
+    </div>
+    <div class="as-people">${prows||'<div class="tp-empty">표시할 팀원이 없어요.</div>'}</div>`;
+}
+function assignDragStart(ev,id){assignDragId=id;ev.currentTarget.classList.add('dragging');ev.dataTransfer.effectAllowed='move';}
 function dragEnd(ev){ev.currentTarget.classList.remove('dragging');}
-function allowDrop(ev,col){ev.preventDefault();col.classList.add('drop');}
-function dropCard(ev,col){ev.preventDefault();col.classList.remove('drop');if(!dragRef)return;const st=col.getAttribute('data-st');const e=data.events.find(x=>x.id===dragRef.evId);if(!e)return;const t=(e.todos||[]).find(x=>x.id===dragRef.tId);if(!t)return;t.status=st;dragRef=null;save();renderKanban();}
+function assignAllowDrop(ev,col){ev.preventDefault();col.classList.add('drop');}
+async function assignDrop(ev,assigneeId){
+  ev.preventDefault();ev.currentTarget.classList.remove('drop');
+  if(!isLeader()||!assignDragId)return;
+  const id=assignDragId;assignDragId=null;
+  const t=assignTasks.find(x=>x.id===id);if(!t||t.assignee===assigneeId)return;
+  const prev=t.assignee;
+  t.assignee=assigneeId;assignRenderShell();
+  const {error}=await sb.from('assign_tasks').update({assignee:assigneeId,updated_by:profile.id}).eq('id',id);
+  if(error){console.error(error);t.assignee=prev;assignRenderShell();alert('배정 변경 중 오류가 발생했어요. 다시 시도해주세요.');}
+}
+async function assignComplete(id){
+  const t=assignTasks.find(x=>x.id===id);if(!t)return;
+  if(!isLeader()&&t.assignee!==profile.id)return;
+  const prevStatus=t.status,prevDoneAt=t.done_at;
+  t.status='done';t.done_at=new Date().toISOString();assignRenderShell();
+  const {error}=await sb.from('assign_tasks').update({status:'done',done_at:t.done_at,updated_by:profile.id}).eq('id',id);
+  if(error){console.error(error);t.status=prevStatus;t.done_at=prevDoneAt;assignRenderShell();alert('완료 처리 중 오류가 발생했어요. 다시 시도해주세요.');}
+}
+async function assignAddTask(){
+  if(!isLeader())return;
+  const inp=document.getElementById('assign-new-text'),sel=document.getElementById('assign-new-prio');
+  if(!inp)return;
+  const text=(inp.value||'').trim();if(!text)return;
+  const priority=sel?sel.value:'mid';
+  inp.disabled=true;
+  const {data:row,error}=await sb.from('assign_tasks').insert({text,priority,created_by:profile.id,updated_by:profile.id}).select().single();
+  if(error){console.error(error);alert('업무 생성 중 오류가 발생했어요. 다시 시도해주세요.');if(inp){inp.disabled=false;}return;}
+  assignTasks.push(row);
+  assignRenderShell();
+  const freshInp=document.getElementById('assign-new-text');if(freshInp)freshInp.focus();
+}
+async function assignDeleteTask(id){
+  if(!isLeader())return;
+  if(!confirm('이 업무를 삭제할까요?'))return;
+  const idx=assignTasks.findIndex(x=>x.id===id);if(idx<0)return;
+  const removed=assignTasks[idx];
+  assignTasks.splice(idx,1);assignRenderShell();
+  const {error}=await sb.from('assign_tasks').delete().eq('id',id);
+  if(error){console.error(error);assignTasks.splice(idx,0,removed);assignRenderShell();alert('삭제 중 오류가 발생했어요. 다시 시도해주세요.');}
+}
 
 /* event ops */
-function newEventToday(){view=new Date();if(viewMode==='kanban')setView('calendar');else renderCal();newEvent(TODAY_STR);}
+function newEventToday(){view=new Date();if(viewMode!=='calendar')setView('calendar');else renderCal();newEvent(TODAY_STR);}
 function newEvent(date){if(!isLeader()||isMobileCal())return;const firstActive=(data.projects.find(p=>!p.archived)||data.projects[0]).id;const def=(projSel&&projSel.length===1&&projSel[0]!=='__none')?projSel[0]:firstActive;const ev={id:uid(),title:'',date,endDate:date,memo:'',projectId:def,todos:[]};data.events.push(ev);openId=ev.id;renderModal(true);}
 function openEvent(id){openId=id;renderModal(false);}
 function cur(){return data.events.find(x=>x.id===openId);}
