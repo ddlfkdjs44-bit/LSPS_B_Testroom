@@ -910,9 +910,9 @@
     .brand h1{font-size:14px;}
     .brand .sub{display:none;}
     .top-right{gap:5px;margin-top:2px;}
-    .seg{padding:2px;}
-    .seg button{padding:7px 8px;font-size:0;gap:0;}
-    #report-btn,#leave-request-btn{font-size:0;padding:7px 8px;gap:0;}
+    /* 모바일 = 캘린더 전용 보기 모드: 탭 전환/입력성 버튼은 숨기고 조회만 가능하게 */
+    .seg{display:none;}
+    #report-btn,#leave-request-btn,#leave-bell-btn,#signup-bell-btn,#announce-btn,#help-btn,#settings-btn{display:none !important;}
     .clock{display:none;}
     #user-badge{font-size:10px;}
     .icon-btn{width:30px;height:30px;}
@@ -924,8 +924,8 @@
     .proj-bar::-webkit-scrollbar{display:none;}
     .proj-bar .chip{flex-shrink:0;}
     .chip{font-size:11.5px;padding:6px 9px;}
-    .io-btns{flex-shrink:0;}
-    .io-btns button{font-size:0;padding:6px 8px;gap:0;}
+    .io-btns{display:none;}
+    #todo-panel{display:none !important;}
 
     .cal-head{padding:8px 10px;gap:6px;}
     .cal-title{font-size:15px;}
@@ -940,8 +940,8 @@
     .cal-title .mo{font-size:18px;}
     .cal-actions{gap:5px;}
     .cal-actions button{padding:6px 8px;font-size:0;gap:0;}
-    .cal-actions .btn-primary,.cal-actions button:nth-child(2){font-size:12.5px;gap:5px;padding:7px 12px;}
-    .cal-actions button:nth-child(1){display:none;}
+    .cal-actions button:nth-child(2){font-size:12.5px;gap:5px;padding:7px 12px;}
+    .cal-actions button:nth-child(1),.cal-actions .btn-primary{display:none;}
 
     .scrim{padding:14px 10px;}
     .modal{border-radius:14px;}
@@ -962,8 +962,23 @@
     #wr-view .wr-add-group{width:calc(100% - 28px);margin:8px 14px 14px;}
   }
 
+  /* 모바일(터치 기기)에서는 가로모드만 지원 — 세로로 들고 있으면 회전 안내만 보여주고 앱은 숨김 */
+  .rotate-gate{display:none;position:fixed;inset:0;z-index:9500;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;}
+  .rotate-gate svg{width:52px;height:52px;color:var(--accent);animation:rotateHint 1.6s ease-in-out infinite;}
+  .rotate-gate p{font-size:15px;font-weight:600;color:var(--ink);margin:0;}
+  .rotate-gate span{font-size:12.5px;color:var(--ink-faint);}
+  @keyframes rotateHint{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+  @media (orientation:portrait) and (pointer:coarse){
+    #app,#photo-lightbox{display:none !important;}
+    .rotate-gate{display:flex;}
+  }
 </style>
 
+<div class="rotate-gate" id="rotate-gate">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><path d="M12 18h.01"/></svg>
+  <p>화면을 가로로 돌려주세요</p>
+  <span>캘린더는 가로 모드에서만 볼 수 있어요</span>
+</div>
 <div class="photo-lightbox" id="photo-lightbox" onclick="closePhotoLightbox()"><img id="photo-lightbox-img" src=""></div>
 <div id="app">
   <div class="topbar">
@@ -1636,6 +1651,7 @@ function setView(v){
   else{
     if(v==='leave'||v==='stat')v='calendar';
     if(!isLeader()&&v==='kanban')v='calendar';
+    if(isMobileCal())v='calendar'; // 모바일은 캘린더 전용 보기
   }
   viewMode=v;
   document.getElementById('vt-cal').classList.toggle('on',v==='calendar');
@@ -1658,7 +1674,7 @@ function renderAll(){
   else if(viewMode==='qc'){layout.classList.add('kanban-mode');tp.style.display='none';qcRenderShell();}
   else if(viewMode==='supplies'){layout.classList.add('kanban-mode');tp.style.display='none';renderSuppliesView();}
   else if(viewMode==='wr'){layout.classList.add('kanban-mode');tp.style.display='none';wrRenderShell();}
-  else{layout.classList.remove('kanban-mode');tp.style.display='';renderCal();renderTodos();}
+  else{layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';renderCal();renderTodos();}
 }
 function refreshBg(){if(viewMode==='kanban')renderKanban();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='qc')qcRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='qc'&&viewMode!=='wr')renderProjectBar();}
 
@@ -2595,7 +2611,7 @@ function dropCard(ev,col){ev.preventDefault();col.classList.remove('drop');if(!d
 
 /* event ops */
 function newEventToday(){view=new Date();if(viewMode==='kanban')setView('calendar');else renderCal();newEvent(TODAY_STR);}
-function newEvent(date){if(!isLeader())return;const firstActive=(data.projects.find(p=>!p.archived)||data.projects[0]).id;const def=(projSel&&projSel.length===1&&projSel[0]!=='__none')?projSel[0]:firstActive;const ev={id:uid(),title:'',date,endDate:date,memo:'',projectId:def,todos:[]};data.events.push(ev);openId=ev.id;renderModal(true);}
+function newEvent(date){if(!isLeader()||isMobileCal())return;const firstActive=(data.projects.find(p=>!p.archived)||data.projects[0]).id;const def=(projSel&&projSel.length===1&&projSel[0]!=='__none')?projSel[0]:firstActive;const ev={id:uid(),title:'',date,endDate:date,memo:'',projectId:def,todos:[]};data.events.push(ev);openId=ev.id;renderModal(true);}
 function openEvent(id){openId=id;renderModal(false);}
 function cur(){return data.events.find(x=>x.id===openId);}
 function renderModalReadonly(e){
@@ -2624,7 +2640,7 @@ function renderModalReadonly(e){
 }
 function renderModal(isNew){
   const e=cur();if(!e){closeModal();return;}
-  if(!isLeader()){renderModalReadonly(e);return;}
+  if(!isLeader()||isMobileCal()){renderModalReadonly(e);return;}
   const todos=(e.todos||[]).slice().sort((a,b)=>{const o={todo:0,doing:1,review:2,done:3};if(o[a.status]!==o[b.status])return o[a.status]-o[b.status];return PRIO[a.priority].rank-PRIO[b.priority].rank;});
   const projOpts=data.projects.map(p=>`<option value="${p.id}" ${e.projectId===p.id?'selected':''}>${esc(p.name)}${p.archived?' (보관됨)':''}</option>`).join('');
   const tmplOpts=data.templates.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join('');
