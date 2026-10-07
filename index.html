@@ -383,10 +383,12 @@
   .itp-select,.itp-input{border:1px solid var(--line);border-radius:9px;background:var(--paper);font-family:inherit;font-size:13.5px;color:var(--ink);padding:9px 11px;outline:none;transition:border-color .15s;}
   .itp-select:focus,.itp-input:focus{border-color:var(--accent);}
   .itp-input{flex:1;min-width:140px;}
+  .itp-seq-input{flex:none;width:76px;font-family:var(--mono);text-align:center;}
   .itp-btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:9px 18px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap;}
   .itp-btn:hover{background:var(--accent-deep);}
   .itp-btn:disabled{opacity:.55;cursor:default;}
   .itp-preview{font-family:var(--mono);font-size:13px;color:var(--accent-deep);font-weight:700;}
+  .itp-preview-hint{font-size:11.5px;color:var(--ink-faint);margin-top:4px;}
   .itp-list-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
   .itp-list-head h3{font-size:14px;font-weight:700;color:var(--ink);}
   .itp-count{font-family:var(--mono);font-size:11.5px;color:var(--ink-faint);}
@@ -2882,45 +2884,65 @@ function itpRenderView(){
     <div class="itp-issue-card">
       <div class="itp-issue-row">
         <select class="itp-select" id="itp-new-year">${yearOpts}</select>
+        <input type="number" id="itp-new-seq" class="itp-input itp-seq-input" min="1" step="1" value="${previewSeq}" title="순번 (이미 다른 곳에서 더 큰 번호까지 썼다면 직접 수정해서 발급하면 돼요)">
         <input type="text" id="itp-new-item" class="itp-input" placeholder="품목·프로젝트명 (선택)">
         <input type="text" id="itp-new-note" class="itp-input" placeholder="비고 (선택)">
         <button class="itp-btn" id="itp-issue-btn" onclick="itpIssue()">번호 발급</button>
       </div>
-      <div class="itp-preview">다음 번호 (${previewYear}년): ${itpFullNo(previewYear,previewSeq)}</div>
+      <div class="itp-preview" id="itp-preview-txt">발급될 번호: ${itpFullNo(previewYear,previewSeq)}</div>
+      <div class="itp-preview-hint">순번은 자동으로 다음 번호가 채워지지만, 이미 대장 밖에서 더 앞서 쓰고 있는 번호가 있으면 위 칸에 직접 입력해서 그 다음부터 이어 발급할 수 있어요.</div>
     </div>
     <div class="itp-list-head"><h3>발급 내역</h3><span class="itp-count">총 ${itpNumbers.length}건</span></div>
     <div class="itp-list">${rows||'<div class="kempty">아직 발급된 번호가 없어요.</div>'}</div>`;
   const yearSel=document.getElementById('itp-new-year');
+  const seqInp=document.getElementById('itp-new-seq');
+  const prevEl=document.getElementById('itp-preview-txt');
+  function itpSyncPreview(){
+    const y=yearSel?parseInt(yearSel.value,10):previewYear;
+    let s=seqInp?parseInt(seqInp.value,10):previewSeq;
+    if(!s||s<1||isNaN(s))s=1;
+    if(prevEl)prevEl.textContent=`발급될 번호: ${itpFullNo(y,s)}`;
+  }
   if(yearSel)yearSel.onchange=()=>{
     const y=parseInt(yearSel.value,10);
-    const prevEl=el.querySelector('.itp-preview');
-    if(prevEl)prevEl.textContent=`다음 번호 (${y}년): ${itpFullNo(y,itpNextSeq(y))}`;
+    if(seqInp)seqInp.value=itpNextSeq(y);
+    itpSyncPreview();
   };
+  if(seqInp)seqInp.oninput=itpSyncPreview;
 }
+function itpReSort(){itpNumbers.sort((a,b)=>b.year-a.year||b.seq-a.seq);}
 async function itpIssue(){
   const yearSel=document.getElementById('itp-new-year');
   const year=yearSel?parseInt(yearSel.value,10):new Date().getFullYear();
+  const seqInp=document.getElementById('itp-new-seq');
+  const autoSeq=itpNextSeq(year);
+  let seq=seqInp?parseInt(seqInp.value,10):autoSeq;
+  if(!seq||seq<1||isNaN(seq))seq=autoSeq;
+  const manualOverride=seq!==autoSeq; // 순번 칸을 직접 고쳐서 발급하는 경우 (예: 대장 밖에서 이미 K028까지 썼을 때)
   const itemInp=document.getElementById('itp-new-item'),noteInp=document.getElementById('itp-new-note');
   const item=(itemInp&&itemInp.value||'').trim();
   const note=(noteInp&&noteInp.value||'').trim();
   const btn=document.getElementById('itp-issue-btn');if(btn)btn.disabled=true;
-  const seq=itpNextSeq(year);
   const {data:row,error}=await sb.from('itp_numbers').insert({year,seq,full_no:itpFullNo(year,seq),item_desc:item,note,created_by:profile.id}).select().single();
   if(error){
     console.error(error);
     if(error.code==='23505'){
+      if(manualOverride){
+        alert(`${itpFullNo(year,seq)} 번호는 이미 쓰고 있어요. 다른 순번을 입력해주세요.`);
+        if(btn)btn.disabled=false;return;
+      }
       // 동시에 두 명이 같은 순번으로 발급 시도한 경우 — 최신 내역을 다시 받아서 한 번만 재시도
       await itpLoad();
       const retrySeq=itpNextSeq(year);
       const {data:row2,error:err2}=await sb.from('itp_numbers').insert({year,seq:retrySeq,full_no:itpFullNo(year,retrySeq),item_desc:item,note,created_by:profile.id}).select().single();
       if(err2){console.error(err2);alert('번호 발급 중 오류가 발생했어요. 다시 시도해주세요.');if(btn)btn.disabled=false;return;}
-      itpNumbers.unshift(row2);
+      itpNumbers.unshift(row2);itpReSort();
     }else{
       alert('번호 발급 중 오류가 발생했어요. 다시 시도해주세요.');
       if(btn)btn.disabled=false;return;
     }
   }else{
-    itpNumbers.unshift(row);
+    itpNumbers.unshift(row);itpReSort();
   }
   if(btn)btn.disabled=false;
   if(viewMode==='misc')miscRenderSection();
