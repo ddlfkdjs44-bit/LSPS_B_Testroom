@@ -161,6 +161,8 @@
   .week{position:relative;display:grid;grid-template-columns:repeat(7,1fr);gap:7px;}
   .cell{position:relative;border:1px solid var(--line-soft);border-radius:var(--r-sm);padding:7px 8px;cursor:pointer;
     background:var(--cell-bg);transition:all .15s;overflow:hidden;}
+  :where(:root:not([data-theme="dark"])) .cell{background:#eef0f3;border-color:#dde0e5;}
+  :where(:root:not([data-theme="dark"])) .cell.muted{background:#e6e8ec;}
   .cell:hover{border-color:var(--accent);background:var(--paper);box-shadow:0 2px 8px rgba(14,107,115,.1);}
   .cell:hover::after{content:"+";position:absolute;top:5px;right:8px;font-size:15px;font-weight:600;color:var(--accent);opacity:.55;}
   .cell.muted{opacity:.45;} .cell.muted:hover::after{display:none;}
