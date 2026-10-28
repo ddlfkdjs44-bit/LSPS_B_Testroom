@@ -84,6 +84,7 @@
   .proj-bar .lbl{font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);margin-right:2px;text-transform:uppercase;}
   .proj-bar .projchip.on{background:var(--accent-tint);border-color:var(--accent);color:var(--accent-deep);}
   .proj-bar .projchip.on:hover{color:var(--accent-deep);}
+  .proj-bar .lvchip.on{background:var(--accent-tint);border-color:var(--accent);color:var(--accent-deep);}
   .proj-bar .projall.on{background:var(--ink);color:#fff;border-color:var(--ink);}
   .proj-bar .projall.on:hover{color:#fff;}
   .proj-bar .pcheck{font-size:11px;font-weight:800;color:var(--accent);display:inline-flex;margin-right:-1px;}
@@ -850,7 +851,7 @@
     .top-right{gap:5px;margin-top:2px;}
     /* 모바일 = 캘린더(조회 전용) + 업무분장(조회·체크 전용) 탭만 지원, 나머지 탭/입력성 버튼은 숨김 */
     .seg button{display:none;}
-    .seg #vt-cal,.seg #vt-assign{display:flex;}
+    .seg #vt-cal,.seg #vt-assign,.seg #vt-note{display:flex;}
     #report-btn,#leave-request-btn,#leave-bell-btn,#signup-bell-btn,#announce-btn,#help-btn,#settings-btn{display:none !important;}
     .clock{display:none;}
     #user-badge{font-size:10px;}
@@ -859,7 +860,13 @@
     .demo-role-btn{font-size:11px;padding:6px 8px;}
 
     /* 프로젝트 필터/가져오기·내보내기 바 전체 숨김 — 캘린더 가로 폭을 최대한 확보 */
-    .controls{display:none !important;}
+    .controls{margin:0 0 6px;}
+    .controls .io-btns{display:none !important;}
+    .proj-bar>*:not(.lvchip){display:none !important;}
+    body[data-view="note"] .controls{display:none !important;}
+    .memo-pad{min-height:55vh;font-size:15px;}
+    .dmemo-grid{column-width:auto;column-count:1;}
+    .dmemo-newdate{max-width:none;}
     body:not([data-view="assign"]) #todo-panel{display:none !important;}
 
     /* 업무분장 탭: 모바일에서는 조회·완료체크만 — 생성/배정(드래그)/삭제는 숨김 */
@@ -1612,14 +1619,17 @@ function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt
 function openPhotoLightbox(src){document.getElementById('photo-lightbox-img').src=src;document.getElementById('photo-lightbox').classList.add('show');}
 function closePhotoLightbox(){document.getElementById('photo-lightbox').classList.remove('show');}
 function projAllIds(){const ids=data.projects.map(p=>p.id);if(data.events.some(e=>!e.projectId))ids.push('__none');return ids;}
-function passProj(e){if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
+let hideLeave=false;try{hideLeave=localStorage.getItem('lsps_hide_leave')==='1';}catch(_){}
+function isLeaveEv(e){if(e.leave||e.leaveRequestId)return true;const p=e.projectId?data.projects.find(x=>x.id===e.projectId):null;return !!(p&&p.name==='휴가');}
+function toggleHideLeave(){hideLeave=!hideLeave;try{localStorage.setItem('lsps_hide_leave',hideLeave?'1':'0');}catch(_){}renderAll();}
+function passProj(e){if(hideLeave&&isLeaveEv(e))return false;if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
 
 function setView(v){
   const tier=roleTier();
   if(tier==='supplies'){v='supplies';}
   else{
     if(v==='leave'||v==='stat')v='calendar';
-    if(isMobileCal()&&v!=='calendar'&&v!=='assign')v='calendar'; // 모바일은 캘린더 + 업무분장(조회·체크 전용)만 지원
+    if(isMobileCal()&&v!=='calendar'&&v!=='assign'&&v!=='note')v='calendar'; // 모바일은 캘린더 + 업무분장(조회·체크 전용)만 지원
   }
   viewMode=v;
   document.body.setAttribute('data-view',v);
@@ -1659,6 +1669,7 @@ function renderProjectBar(){
   if(data.events.some(e=>!e.projectId)){const on=projSel!==null&&projSel.includes('__none');c+=`<div class="chip projchip ${on?'on':''}" onclick="toggleProj('__none')">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:#999"></span>프로젝트 없음</div>`;}
   c+=`<div class="chip add" onclick="addProject()">+ 추가</div>`;
   if(archivedP.length)c+=`<div class="chip toggle-archived" onclick="toggleShowArchivedProj()">${showArchivedProj?'보관 숨기기':'보관됨 '+archivedP.length}</div>`;
+  c+=`<div class="chip lvchip ${hideLeave?'on':''}" onclick="toggleHideLeave()" title="휴가 일정을 숨기고 봅니다">${hideLeave?'<span class="pcheck">✓</span>':''}휴가 제외</div>`;
   document.getElementById('proj-bar').innerHTML=c;
 }
 function toggleShowArchivedProj(){showArchivedProj=!showArchivedProj;renderProjectBar();}
