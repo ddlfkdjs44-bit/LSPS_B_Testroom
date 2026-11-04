@@ -273,6 +273,7 @@
   .ebar.contL{border-top-left-radius:0;border-bottom-left-radius:0;}
   .ebar.contR{border-top-right-radius:0;border-bottom-right-radius:0;}
   .ebar.alldone{opacity:.48;}
+  .ebar .kbadge{display:inline-block;font-size:9.5px;font-weight:800;line-height:1;border-radius:4px;padding:2px 4px;margin-right:5px;vertical-align:1px;}
   .ebar .bc{font-family:var(--mono);font-size:9.5px;opacity:.88;margin-right:5px;}
 
   /* ── todo panel ── */
@@ -1622,6 +1623,9 @@ function projAllIds(){const ids=data.projects.map(p=>p.id);if(data.events.some(e
 let hideLeave=false;try{hideLeave=localStorage.getItem('lsps_hide_leave')==='1';}catch(_){}
 function isLeaveEv(e){if(e.leave||e.leaveRequestId)return true;const p=e.projectId?data.projects.find(x=>x.id===e.projectId):null;return !!(p&&p.name==='휴가');}
 function toggleHideLeave(){hideLeave=!hideLeave;try{localStorage.setItem('lsps_hide_leave',hideLeave?'1':'0');}catch(_){}renderAll();}
+const EV_KINDS=[{re:/FAT/i,lbl:'FAT',bg:'#ff7a59',fg:'#fff'},{re:/자체/,lbl:'자체',bg:'#ffd54a',fg:'#333'},{re:/SAT/i,lbl:'SAT',bg:'#2fb6a3',fg:'#fff'}];
+function evKind(e){const t=e.title||'';return EV_KINDS.find(k=>k.re.test(t))||null;}
+function kbadgeHtml(e){const k=evKind(e);return k?`<span class="kbadge" style="background:${k.bg};color:${k.fg}">${k.lbl}</span>`:'';}
 function passProj(e){if(hideLeave&&isLeaveEv(e))return false;if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
 
 function setView(v){
@@ -2361,7 +2365,7 @@ function renderWeek(weekStart,curMonth){
     const bc=tot?`<span class="bc">${done}/${tot}</span>`:'';
     const cls=`ebar ${sg.contL?'contL':''} ${sg.contR?'contR':''} ${allDone?'alldone':''}`;
     const label=(sg.contL&&sg.startCol===0?'‹ ':'')+esc(sg.e.title||'(제목 없음)')+(sg.contR?' ›':'');
-    bars+=`<div class="${cls}" style="left:${left};width:${width};top:${top}px;background:${projColor(sg.e.projectId)}" onclick="event.stopPropagation();openEvent('${sg.e.id}')">${bc}${label}</div>`;
+    bars+=`<div class="${cls}" style="left:${left};width:${width};top:${top}px;background:${projColor(sg.e.projectId)}" onclick="event.stopPropagation();openEvent('${sg.e.id}')">${bc}${kbadgeHtml(sg.e)}${label}</div>`;
   });
   return `<div class="week">${cells}<div class="bars">${bars}</div></div>`;
 }
@@ -2454,7 +2458,7 @@ function buildCalCanvasWide(){
       ctx.fillStyle='#fff'; ctx.font=`600 13px ${FONT}`;
       ctx.textAlign='left';
       const label=(sg.contL&&sg.startCol===0?'‹ ':'')+(sg.e.title||'(제목 없음)')+(sg.contR?' ›':'');
-      ctx.fillText(label, x+11, yb+(BARH-6)/2+4.5, w-20);
+      {const k=evKind(sg.e);ctx.fillText((k?'['+k.lbl+'] ':'')+label, x+11, yb+(BARH-6)/2+4.5, w-20);}
     });
     y0+=wk.h+GAP;
   });
@@ -2742,7 +2746,6 @@ function renderModalReadonly(e){
     <div class="m-body">
       <div class="row3">
         <div><div class="field-lbl">프로젝트</div><div class="ro-field">${esc(projName(e.projectId))}</div></div>
-        <div><div class="field-lbl">단가</div><div class="ro-field">${e.price?(+e.price).toLocaleString('ko-KR')+'원':'—'}</div></div>
         <div><div class="field-lbl">휴가</div><div class="ro-field">${lvOn?lvTxt:'—'}</div></div>
       </div>
       <div class="field-lbl">메모</div>
@@ -2778,7 +2781,7 @@ function renderModal(isNew){
   const tlist=todos.length?todos.map(t=>{
     const stOpts=STATUS.map(s=>`<option value="${s.id}" ${t.status===s.id?'selected':''}>${s.lbl}</option>`).join('');
     const prOpts=Object.entries(PRIO).map(([k,v])=>`<option value="${k}" ${t.priority===k?'selected':''}>${v.lbl}</option>`).join('');
-    return `<div class="mt ${t.status==='done'?'done':''}"><span class="txt">${esc(t.text)}</span><select onchange="setStatus('${t.id}',this.value)" title="상태">${stOpts}</select><select onchange="setPrio('${t.id}',this.value)" title="우선순위">${prOpts}</select><button class="del" onclick="delTodo('${t.id}')">×</button></div>`;}).join(''):`<div class="m-empty">이 일정에 할일을 추가해보세요.</div>`;
+    return `<div class="mt ${t.status==='done'?'done':''}"><span class="txt">${esc(t.text)}</span><button class="del" onclick="delTodo('${t.id}')">×</button></div>`;}).join(''):`<div class="m-empty">이 일정에 할일을 추가해보세요.</div>`;
   document.getElementById('modal').innerHTML=`
     <div class="m-head"><div class="m-date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${span}</div><input class="m-title-in" id="ev-title" placeholder="일정 제목 입력…" value="${esc(e.title)}" oninput="setTitle(this.value)"></div>
     <div class="m-body">
@@ -2787,13 +2790,11 @@ function renderModal(isNew){
         <div><div class="field-lbl">종료일</div><input type="date" class="m-in" value="${e.endDate||e.date}" min="${e.date}" onchange="setEnd(this.value)"></div>
         <div><div class="field-lbl">프로젝트</div><select class="m-sel" onchange="setProject(this.value)">${projOpts}</select></div>
       </div>
-      <div class="m-price"><span class="field-lbl">단가</span><input type="text" inputmode="numeric" class="m-in m-price-in" value="${e.price?(+e.price).toLocaleString('ko-KR'):''}" placeholder="0" oninput="setPrice(this.value)" onblur="fmtPriceInput(this)"><span class="m-price-won">원</span><span class="m-price-hint">집계 탭에서 월별 금액으로 합산돼요</span></div>
-      ${leaveBox}
       ${tmplBar}
       <div class="field-lbl">메모</div>
       <textarea class="m-memo" id="ev-memo" placeholder="비고, 담당, 참고사항…" oninput="setMemo(this.value)">${esc(e.memo||'')}</textarea>
       <div class="field-lbl">할일 (To-do)</div>
-      <div class="todo-add"><input id="td-in" placeholder="할일 입력 후 Enter" onkeydown="if(event.key==='Enter')addTodo()"><select id="td-prio"><option value="high">높음</option><option value="mid" selected>중간</option><option value="low">낮음</option></select><button onclick="addTodo()">추가</button></div>
+      <div class="todo-add"><input id="td-in" placeholder="할일 입력 후 Enter" onkeydown="if(event.key==='Enter')addTodo()"><button onclick="addTodo()">추가</button></div>
       <div class="m-todos">${tlist}</div>
     </div>
     <div class="m-foot"><div class="left"><button class="danger" onclick="delEvent()">일정 삭제</button><button class="ghost" onclick="saveAsTemplate()">템플릿 저장</button></div><button class="done-btn" onclick="closeModal()">완료</button></div>`;
@@ -2811,7 +2812,7 @@ function setLeaveDays(v){const e=cur();if(!e||!e.leave)return;e.leave.days=Math.
 function setLeaveHours(v){const e=cur();if(!e||!e.leave)return;e.leave.hours=Math.max(0,+v||0);save();renderModal(false);refreshBg();}
 function setStart(v){const e=cur();if(!e||!v)return;e.date=v;if(dayNum(e.endDate||v)<dayNum(v))e.endDate=v;save();renderModal(false);refreshBg();}
 function setEnd(v){const e=cur();if(!e||!v)return;if(dayNum(v)<dayNum(e.date))v=e.date;e.endDate=v;save();renderModal(false);refreshBg();}
-function addTodo(){const e=cur();if(!e)return;const inp=document.getElementById('td-in'),txt=inp.value.trim();if(!txt)return;const prio=document.getElementById('td-prio').value;if(!e.todos)e.todos=[];e.todos.push({id:uid(),text:txt,priority:prio,status:'todo'});inp.value='';save();renderModal(false);const ni=document.getElementById('td-in');if(ni)ni.focus();refreshBg();}
+function addTodo(){const e=cur();if(!e)return;const inp=document.getElementById('td-in'),txt=inp.value.trim();if(!txt)return;const prio='mid';if(!e.todos)e.todos=[];e.todos.push({id:uid(),text:txt,priority:prio,status:'todo'});inp.value='';save();renderModal(false);const ni=document.getElementById('td-in');if(ni)ni.focus();refreshBg();}
 function toggleDone(evId,tId){if(!isLeader())return;const e=data.events.find(x=>x.id===evId);if(!e)return;const t=(e.todos||[]).find(x=>x.id===tId);if(!t)return;t.status=t.status==='done'?'todo':'done';save();if(openId)renderModal(false);refreshBg();}
 function setStatus(tId,v){const e=cur();if(!e)return;const t=e.todos.find(x=>x.id===tId);if(t){t.status=v;save();renderModal(false);refreshBg();}}
 function setPrio(tId,v){const e=cur();if(!e)return;const t=e.todos.find(x=>x.id===tId);if(t){t.priority=v;save();renderModal(false);refreshBg();}}
