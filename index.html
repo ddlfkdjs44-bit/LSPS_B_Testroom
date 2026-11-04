@@ -273,6 +273,10 @@
   .ebar.contL{border-top-left-radius:0;border-bottom-left-radius:0;}
   .ebar.contR{border-top-right-radius:0;border-bottom-right-radius:0;}
   .ebar.alldone{opacity:.48;}
+  .ksums{display:flex;align-items:center;gap:6px;margin-left:6px;}
+  .ksum{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--ink-soft);background:var(--cell-bg);border:1px solid var(--line);border-radius:8px;padding:4px 9px;}
+  .ksum b{color:var(--ink);font-family:var(--mono);font-size:13px;}
+  .ksum .kbadge{display:inline-block;font-size:10px;font-weight:800;line-height:1;border-radius:4px;padding:2px 5px;}
   .ebar .kbadge{display:inline-block;font-size:9.5px;font-weight:800;line-height:1;border-radius:4px;padding:2px 4px;margin-right:5px;vertical-align:1px;}
   .ebar .bc{font-family:var(--mono);font-size:9.5px;opacity:.88;margin-right:5px;}
 
@@ -879,6 +883,7 @@
     body[data-view="assign"] #todo-panel{order:-1;}
 
     .cal-head{padding:6px 8px;gap:5px;}
+    .ksums{margin-left:0;gap:3px;} .ksum{padding:2px 5px;font-size:10px;gap:2px;} .ksum b{font-size:11px;} .ksum .kbadge{font-size:9px;padding:1px 3px;}
     .cal-title{font-size:14px;}
     .cal-body{padding:0 4px 8px;gap:3px;}
     .week{gap:3px;}
@@ -2318,6 +2323,7 @@ function renderCal(){
       <div class="cal-left">
         <div class="cal-title"><span class="mo">${m+1}월</span><span class="yr">${y}</span></div>
         <div class="nav"><button class="today" onclick="goToday()">오늘</button><button onclick="shift(-1)">‹</button><button onclick="shift(1)">›</button></div>
+        ${kindSummaryHtml(y,m)}
       </div>
       <div class="cal-actions">
         <button class="cal-print" onclick="window.print()" title="이번 달 캘린더 인쇄 / PDF 저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>인쇄</button>
@@ -2328,6 +2334,12 @@ function renderCal(){
     </div>
     <div class="weekdays">${WD.map(w=>`<div>${w}</div>`).join('')}</div>
     <div class="cal-body">${weeksHtml}</div>`;
+}
+function kindSummaryHtml(y,m){
+  const ms=`${y}-${String(m+1).padStart(2,'0')}-01`,me=`${y}-${String(m+1).padStart(2,'0')}-31`;const cnt={FAT:0,자체:0};
+  data.events.forEach(e=>{if(!passProj(e))return;const st=e.date||'',en=e.endDate||st;if(!st||en<ms||st>me)return;const k=evKind(e);if(k&&cnt[k.lbl]!==undefined)cnt[k.lbl]++;});
+  const chip=(lbl,bg,fg)=>`<span class="ksum"><span class="kbadge" style="background:${bg};color:${fg}">${lbl}</span><b>${cnt[lbl]}</b>건</span>`;
+  return `<div class="ksums" title="이번 달에 걸치는 일정 모두 집계">${chip('FAT','#ff7a59','#fff')}${chip('자체','#ffd54a','#333')}</div>`;
 }
 function renderWeek(weekStart,curMonth){
   const HEADER=isMobileCal()?20:26, BARH=isMobileCal()?29:22;
