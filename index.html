@@ -104,7 +104,7 @@
   /* ── 역할별 화면 제어 (팀원: 캘린더 조작·집계 숨김 / 업무분장은 팀원도 볼 수 있음) ── */
   body[data-role="member"] #imp-wrap,body[data-role="member"] .btn-primary,
   body[data-role="member"] .proj-bar .chip.add,body[data-role="member"] .proj-bar .edit{display:none !important;}
-  body[data-role="supplies"] #vt-cal,body[data-role="supplies"] #vt-assign,body[data-role="supplies"] #vt-note,
+  body[data-role="supplies"] #vt-punch,body[data-role="supplies"] #vt-cal,body[data-role="supplies"] #vt-assign,body[data-role="supplies"] #vt-note,
   body[data-role="supplies"] #vt-misc,body[data-role="supplies"] #vt-wr,body[data-role="supplies"] #leave-bell-btn,body[data-role="supplies"] #signup-bell-btn,
   body[data-role="supplies"] #leave-request-btn,body[data-role="supplies"] .controls{display:none !important;}
   body[data-role="leader"] #leave-request-btn{display:none !important;}
@@ -134,6 +134,37 @@
   /* ── layout ── */
   .layout{display:grid;grid-template-columns:1fr 348px;gap:18px;align-items:start;}
   .layout.kanban-mode{grid-template-columns:1fr;}
+  /* 펀치리스트 */
+  .pn-wrap{padding:16px 18px 22px;}
+  .pn-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+  .pn-top select,.pn-add input,.pn-add select,.pn-tbl input,.pn-tbl select{font-family:inherit;font-size:13px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:6px 9px;}
+  .pn-top h2{margin:0;font-size:17px;flex:1;min-width:120px;}
+  .pn-btn{font-family:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);border-radius:8px;padding:6px 11px;cursor:pointer;}
+  .pn-btn:hover{color:var(--ink);border-color:var(--accent);} .pn-btn.pri{background:var(--accent);border-color:var(--accent);color:#fff;}
+  .pn-sum{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:10px;margin-bottom:14px;}
+  .pn-card{border:1px solid var(--line);background:var(--cell-bg);border-radius:12px;padding:12px 14px;}
+  .pn-card .k{font-size:11.5px;font-weight:700;color:var(--ink-faint);margin-bottom:4px;}
+  .pn-card .v{font-size:24px;font-weight:800;font-family:var(--mono);color:var(--ink);line-height:1.1;}
+  .pn-card .v small{font-size:12px;font-weight:600;color:var(--ink-faint);margin-left:3px;}
+  .pn-card.click{cursor:pointer;} .pn-card.click:hover,.pn-card.on{border-color:var(--accent);background:var(--accent-tint);}
+  .pn-bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px;display:flex;}
+  .pn-bar i{display:block;height:100%;} .pn-bar .d{background:#2f9e6e;} .pn-bar .p{background:#e0a431;}
+  .pn-pjt{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;}
+  .pn-pjt th,.pn-tbl th{text-align:left;font-size:11.5px;color:var(--ink-faint);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line);}
+  .pn-pjt td{padding:7px 8px;border-bottom:1px solid var(--line-soft);} .pn-pjt tr.click{cursor:pointer;} .pn-pjt tr.click:hover td{background:var(--accent-tint);}
+  .pn-dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px;}
+  .pn-flt{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 10px;}
+  .pn-add{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .pn-add input[name=item]{flex:2;min-width:200px;} .pn-add input{min-width:90px;flex:1;}
+  .pn-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+  .pn-tbl td{padding:5px 6px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+  .pn-tbl input{width:100%;box-sizing:border-box;border-color:transparent;background:transparent;} .pn-tbl input:hover,.pn-tbl input:focus{border-color:var(--line);background:var(--paper);}
+  .pn-st{border:0;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
+  .pn-st.open{background:var(--hi-bg);color:var(--hi);} .pn-st.prog{background:var(--mid-bg);color:var(--mid);} .pn-st.done{background:rgba(47,158,110,.15);color:#2f9e6e;}
+  .pn-over,.pn-tbl input.pn-over{color:var(--hi);font-weight:700;} .pn-x{cursor:pointer;color:var(--ink-faint);padding:0 6px;} .pn-x:hover{color:var(--hi);}
+  .pn-empty{padding:26px;text-align:center;color:var(--ink-faint);font-size:13px;}
+  @media(max-width:700px),(pointer:coarse){.pn-sum{grid-template-columns:1fr 1fr;}.pn-wrap{padding:10px;}.pn-scroll{overflow-x:auto;}.pn-tbl{min-width:640px;}}
+
   @media(max-width:900px),(pointer:coarse){.layout{grid-template-columns:1fr;}}
   .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
   :where(:root:not([data-theme="dark"])) .panel{border-color:#c9cdd3;box-shadow:0 1px 3px rgba(20,24,30,.10),0 6px 20px rgba(20,24,30,.10);}
@@ -856,7 +887,7 @@
     .top-right{gap:5px;margin-top:2px;}
     /* 모바일 = 캘린더(조회 전용) + 업무분장(조회·체크 전용) 탭만 지원, 나머지 탭/입력성 버튼은 숨김 */
     .seg button{display:none;}
-    .seg #vt-cal,.seg #vt-assign,.seg #vt-note{display:flex;}
+    .seg #vt-cal,.seg #vt-assign,.seg #vt-note,.seg #vt-punch{display:flex;}
     #report-btn,#leave-request-btn,#leave-bell-btn,#signup-bell-btn,#announce-btn,#help-btn,#settings-btn{display:none !important;}
     .clock{display:none;}
     #user-badge{font-size:10px;}
@@ -948,6 +979,7 @@
         <button id="vt-assign" onclick="setView('assign')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>업무분장</button>
         <button id="vt-note" onclick="setView('note')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M15 3v4h4M8 11h8M8 15h6"/></svg>메모</button>
         <button id="vt-misc" onclick="setView('misc')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>기타 기능</button>
+        <button id="vt-punch" onclick="setView('punch')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>펀치리스트</button>
         <button id="vt-supplies" onclick="setView('supplies')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>발주</button>
         <button id="vt-wr" onclick="setView('wr')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h7"/></svg>주간보고</button>
       </div>
@@ -1568,6 +1600,7 @@ let viewMode='calendar', openId=null, filter='all', todoSort='priority', projSel
 
 function migrate(){
   if(!data.events)data.events=[];
+  if(!Array.isArray(data.punch))data.punch=[];
   if(!data.projects||!data.projects.length)data.projects=JSON.parse(JSON.stringify(SEED_PROJECTS));
   if(!data.templates)data.templates=JSON.parse(JSON.stringify(SEED_TEMPLATES));
   data.events.forEach(e=>{
@@ -1633,12 +1666,91 @@ function evKind(e){const t=e.title||'';return EV_KINDS.find(k=>k.re.test(t))||nu
 function kbadgeHtml(e){const k=evKind(e);return k?`<span class="kbadge" style="background:${k.bg};color:${k.fg}">${k.lbl}</span>`:'';}
 function passProj(e){if(hideLeave&&isLeaveEv(e))return false;if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
 
+
+/* ── 펀치리스트 현황·진행률 ── */
+const PN_ST={open:'미결',prog:'진행중',done:'완료'};
+let punchProj='__all', punchFlt='all';
+function pnList(pid){return data.punch.filter(p=>pid==='__all'||(p.projectId||'')===pid);}
+function pnStats(list){const t=list.length,d=list.filter(p=>p.status==='done').length,g=list.filter(p=>p.status==='prog').length,o=t-d-g;
+  const over=list.filter(p=>p.status!=='done'&&p.due&&p.due<TODAY_STR).length;return{t,d,g,o,over,pct:t?Math.round(d/t*100):0};}
+function pnBar(st){return `<div class="pn-bar"><i class="d" style="width:${st.t?st.d/st.t*100:0}%"></i><i class="p" style="width:${st.t?st.g/st.t*100:0}%"></i></div>`;}
+function renderPunchView(){
+  const mp=document.getElementById('main-panel');
+  const lead=isLeader();
+  if(punchProj!=='__all'&&!data.projects.some(p=>p.id===punchProj))punchProj='__all';
+  const list=pnList(punchProj),st=pnStats(list);
+  const opts=`<option value="__all">전체 프로젝트</option>`+data.projects.map(p=>`<option value="${p.id}" ${punchProj===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  const sumCards=`<div class="pn-card"><div class="k">전체 진행률</div><div class="v">${st.pct}<small>% (${st.d}/${st.t})</small></div>${pnBar(st)}</div>
+    <div class="pn-card click ${punchFlt==='open'?'on':''}" onclick="punchSetFlt('open')"><div class="k">미결</div><div class="v">${st.o}<small>건</small></div></div>
+    <div class="pn-card click ${punchFlt==='prog'?'on':''}" onclick="punchSetFlt('prog')"><div class="k">진행중</div><div class="v">${st.g}<small>건</small></div></div>
+    <div class="pn-card click ${punchFlt==='done'?'on':''}" onclick="punchSetFlt('done')"><div class="k">완료</div><div class="v">${st.d}<small>건</small></div></div>
+    <div class="pn-card click ${punchFlt==='over'?'on':''}" onclick="punchSetFlt('over')"><div class="k">기한 초과</div><div class="v" style="${st.over?'color:var(--hi)':''}">${st.over}<small>건</small></div></div>`;
+  let byProj='';
+  if(punchProj==='__all'){
+    const rows=data.projects.map(p=>({p,st:pnStats(pnList(p.id))})).filter(x=>x.st.t>0);
+    const un=pnList('');const unSt=pnStats(un);
+    byProj=rows.length||unSt.t?`<table class="pn-pjt"><thead><tr><th>프로젝트</th><th style="width:34%">진행률</th><th>완료/전체</th><th>미결</th><th>진행중</th><th>초과</th></tr></thead><tbody>`+
+      rows.map(({p,st})=>`<tr class="click" onclick="punchSetProj('${p.id}')"><td><span class="pn-dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}</td><td><b style="font-family:var(--mono)">${st.pct}%</b>${pnBar(st)}</td><td style="font-family:var(--mono)">${st.d}/${st.t}</td><td>${st.o}</td><td>${st.g}</td><td class="${st.over?'pn-over':''}">${st.over}</td></tr>`).join('')+`</tbody></table>`:'';
+  }
+  const flt=l=>punchFlt==='all'?l:punchFlt==='over'?l.filter(p=>p.status!=='done'&&p.due&&p.due<TODAY_STR):l.filter(p=>p.status===punchFlt);
+  const shown=flt(list).sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.due||'9999').localeCompare(b.due||'9999'));
+  const cats=[...new Set(data.punch.map(p=>p.category).filter(Boolean))];
+  const addRow=lead?`<div class="pn-add"><input name="item" id="pn-item" placeholder="펀치 내용 (Enter로 추가)" onkeydown="if(event.key==='Enter')punchAdd()"><input id="pn-cat" list="pn-cats" placeholder="구분 (설계/제작/시험/문서…)"><datalist id="pn-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist><input id="pn-owner" placeholder="담당"><input id="pn-due" type="date"><button class="pn-btn pri" onclick="punchAdd()">추가</button></div>`:'';
+  const proj1=punchProj!=='__all';
+  const body=shown.length?`<div class="pn-scroll"><table class="pn-tbl"><thead><tr><th style="width:38px">No</th>${proj1?'':'<th style="width:120px">프로젝트</th>'}<th>내용</th><th style="width:100px">구분</th><th style="width:90px">담당</th><th style="width:130px">기한</th><th style="width:84px">상태</th>${lead?'<th style="width:28px"></th>':''}</tr></thead><tbody>`+shown.map((p,i)=>{
+    const od=p.status!=='done'&&p.due&&p.due<TODAY_STR;
+    const ro=lead?'':'readonly';
+    return `<tr><td style="color:var(--ink-faint);font-family:var(--mono)">${i+1}</td>${proj1?'':`<td><span class="pn-dot" style="background:${projColor(p.projectId)}"></span>${esc(projName(p.projectId))}</td>`}
+      <td><input ${ro} value="${esc(p.item)}" onchange="punchSet('${p.id}','item',this.value)"></td>
+      <td><input ${ro} value="${esc(p.category||'')}" list="pn-cats" onchange="punchSet('${p.id}','category',this.value)"></td>
+      <td><input ${ro} value="${esc(p.owner||'')}" onchange="punchSet('${p.id}','owner',this.value)"></td>
+      <td><input ${ro} type="date" value="${p.due||''}" class="${od?'pn-over':''}" onchange="punchSet('${p.id}','due',this.value)"></td>
+      <td><button class="pn-st ${p.status}" ${lead?`onclick="punchCycle('${p.id}')" title="눌러서 상태 변경"`:'disabled'}>${PN_ST[p.status]}</button></td>
+      ${lead?`<td><span class="pn-x" onclick="punchDel('${p.id}')" title="삭제">×</span></td>`:''}</tr>`;}).join('')+`</tbody></table></div>`
+    :`<div class="pn-empty">${list.length?'조건에 맞는 항목이 없어요.':'등록된 펀치 항목이 없어요.'+(lead?' 위 입력칸이나 엑셀 붙여넣기로 추가해봐요.':'')}</div>`;
+  const fltBtns=`<div class="pn-flt">${[['all','전체'],['open','미결'],['prog','진행중'],['done','완료'],['over','기한 초과']].map(([k,l])=>`<button class="pn-btn ${punchFlt===k?'pri':''}" onclick="punchSetFlt('${k}')">${l}</button>`).join('')}</div>`;
+  mp.innerHTML=`<div class="pn-wrap"><div class="pn-top"><h2>펀치리스트 현황</h2><select onchange="punchSetProj(this.value)">${opts}</select>
+    ${lead?`<button class="pn-btn" onclick="punchPaste()">엑셀에서 붙여넣기</button>`:''}<button class="pn-btn" onclick="punchCsv()">CSV 내보내기</button></div>
+    <div class="pn-sum">${sumCards}</div>${byProj}${fltBtns}${addRow}${body}</div>`;
+}
+function punchSetProj(id){punchProj=id;renderPunchView();}
+function punchSetFlt(f){punchFlt=punchFlt===f?'all':f;renderPunchView();}
+function punchNextNo(){return data.punch.length+1;}
+async function punchAdd(){
+  if(!isLeader())return;
+  const item=document.getElementById('pn-item').value.trim();if(!item){document.getElementById('pn-item').focus();return;}
+  if(punchProj==='__all'&&!data.projects.length)return;
+  const pid=punchProj==='__all'?(data.projects[0]||{}).id||'':punchProj;
+  if(punchProj==='__all'&&data.projects.length>1&&!confirm(`프로젝트를 고르지 않아서 '${projName(pid)}'에 추가할게요. 괜찮아요? (취소하고 위에서 프로젝트를 선택해도 돼요)`))return;
+  data.punch.push({id:uid(),projectId:pid,item,category:document.getElementById('pn-cat').value.trim(),owner:document.getElementById('pn-owner').value.trim(),due:document.getElementById('pn-due').value,status:'open',created:TODAY_STR});
+  await save();renderPunchView();setTimeout(()=>{const e=document.getElementById('pn-item');e&&e.focus();},30);
+}
+async function punchSet(id,f,v){const p=data.punch.find(x=>x.id===id);if(!p||!isLeader())return;p[f]=(v||'').trim();await save();renderPunchView();}
+async function punchCycle(id){const p=data.punch.find(x=>x.id===id);if(!p||!isLeader())return;p.status={open:'prog',prog:'done',done:'open'}[p.status]||'open';p.doneDate=p.status==='done'?TODAY_STR:'';await save();renderPunchView();}
+async function punchDel(id){const p=data.punch.find(x=>x.id===id);if(!p||!isLeader())return;if(!confirm(`'${p.item}' 항목을 삭제할까요?`))return;data.punch=data.punch.filter(x=>x.id!==id);await save();renderPunchView();}
+async function punchPaste(){
+  if(punchProj==='__all'){alert('먼저 위에서 프로젝트를 선택해줘요.');return;}
+  const t=prompt('엑셀에서 복사한 행을 붙여넣어요.\n열 순서: 내용 / 구분 / 담당 / 기한(YYYY-MM-DD) / 상태(미결·진행중·완료)\n(내용만 있어도 돼요)');
+  if(!t)return;
+  const inv={'미결':'open','진행중':'prog','진행':'prog','완료':'done'};let n=0;
+  t.split(/\r?\n/).forEach(line=>{const c=line.split('\t').map(x=>x.trim());if(!c[0])return;
+    const due=/^\d{4}-\d{2}-\d{2}$/.test(c[3]||'')?c[3]:'';
+    data.punch.push({id:uid(),projectId:punchProj,item:c[0],category:c[1]||'',owner:c[2]||'',due,status:inv[c[4]]||'open',created:TODAY_STR});n++;});
+  if(n){await save();renderPunchView();}
+}
+function punchCsv(){
+  const rows=[['프로젝트','No','내용','구분','담당','기한','상태','완료일']];
+  pnList(punchProj).forEach((p,i)=>rows.push([projName(p.projectId),i+1,p.item,p.category||'',p.owner||'',p.due||'',PN_ST[p.status],p.doneDate||'']));
+  const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`펀치리스트_${punchProj==='__all'?'전체':projName(punchProj)}_${TODAY_STR}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
 function setView(v){
   const tier=roleTier();
   if(tier==='supplies'){v='supplies';}
   else{
     if(v==='leave'||v==='stat')v='calendar';
-    if(isMobileCal()&&v!=='calendar'&&v!=='assign'&&v!=='note')v='calendar'; // 모바일은 캘린더 + 업무분장(조회·체크 전용)만 지원
+    if(isMobileCal()&&v!=='calendar'&&v!=='assign'&&v!=='note'&&v!=='punch')v='calendar'; // 모바일은 캘린더 + 업무분장(조회·체크 전용)만 지원
   }
   viewMode=v;
   document.body.setAttribute('data-view',v);
@@ -1646,25 +1758,27 @@ function setView(v){
   document.getElementById('vt-assign').classList.toggle('on',v==='assign');
   document.getElementById('vt-note').classList.toggle('on',v==='note');
   document.getElementById('vt-misc').classList.toggle('on',v==='misc');
+  document.getElementById('vt-punch').classList.toggle('on',v==='punch');
   document.getElementById('vt-supplies').classList.toggle('on',v==='supplies');
   document.getElementById('vt-wr').classList.toggle('on',v==='wr');
   renderAll();
 }
 function renderAll(){
   const ctrlBar=document.getElementById('controls-bar');
-  if(viewMode==='supplies'||viewMode==='misc'||viewMode==='wr'||viewMode==='assign'){ if(ctrlBar)ctrlBar.style.display='none'; }
+  if(viewMode==='supplies'||viewMode==='misc'||viewMode==='wr'||viewMode==='assign'||viewMode==='punch'){ if(ctrlBar)ctrlBar.style.display='none'; }
   else{ if(ctrlBar)ctrlBar.style.display=''; renderProjectBar(); }
   const layout=document.getElementById('layout'),tp=document.getElementById('todo-panel');
   if(viewMode==='assign'){layout.classList.remove('kanban-mode');tp.style.display='';assignRenderShell();}
   else if(viewMode==='leave'){layout.classList.add('kanban-mode');tp.style.display='none';renderLeaveView();}
   else if(viewMode==='note'){layout.classList.add('kanban-mode');tp.style.display='none';renderNotesView();}
+  else if(viewMode==='punch'){layout.classList.add('kanban-mode');tp.style.display='none';renderPunchView();}
   else if(viewMode==='stat'){layout.classList.add('kanban-mode');tp.style.display='none';renderStatsView();}
   else if(viewMode==='misc'){layout.classList.add('kanban-mode');tp.style.display='none';miscRenderShell();}
   else if(viewMode==='supplies'){layout.classList.add('kanban-mode');tp.style.display='none';renderSuppliesView();}
   else if(viewMode==='wr'){layout.classList.add('kanban-mode');tp.style.display='none';wrRenderShell();}
   else{layout.classList.remove('kanban-mode');tp.style.display=isMobileCal()?'none':'';renderCal();renderTodos();}
 }
-function refreshBg(){if(viewMode==='assign')assignRenderShell();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='misc')miscRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='misc'&&viewMode!=='wr'&&viewMode!=='assign')renderProjectBar();}
+function refreshBg(){if(viewMode==='punch'){renderPunchView();return;}if(viewMode==='assign')assignRenderShell();else if(viewMode==='leave')renderLeaveView();else if(viewMode==='note')renderNotesView();else if(viewMode==='stat')renderStatsView();else if(viewMode==='misc')miscRenderShell();else if(viewMode==='supplies')renderSuppliesView();else if(viewMode==='wr')wrRenderShell();else{renderCal();renderTodos();}if(viewMode!=='supplies'&&viewMode!=='misc'&&viewMode!=='wr'&&viewMode!=='assign')renderProjectBar();}
 
 let showArchivedProj=false;
 function renderProjectBar(){
