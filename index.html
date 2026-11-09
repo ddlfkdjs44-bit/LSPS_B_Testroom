@@ -163,6 +163,8 @@
   .pn-card.click{cursor:pointer;} .pn-card.click:hover,.pn-card.on{border-color:var(--accent);background:var(--accent-tint);}
   .pn-bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:8px;display:flex;}
   .pn-bar i{display:block;height:100%;} .pn-bar .d{background:#2f9e6e;} .pn-bar .p{background:#e0a431;}
+  .pn-newp{font-family:inherit;font-size:13px;border:1px dashed var(--line);background:transparent;color:var(--ink-soft);border-radius:999px;padding:6px 10px;cursor:pointer;}
+  .pn-dc{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:10px;}
   .pn-pjt{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:13px;}
   .pn-pjt th,.pn-tbl th{text-align:left;font-size:11.5px;color:var(--ink-faint);font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line);}
   .pn-pjt td{padding:7px 8px;border-bottom:1px solid var(--line-soft);} .pn-pjt tr.click{cursor:pointer;} .pn-pjt tr.click:hover td{background:var(--accent-tint);}
@@ -1699,7 +1701,7 @@ function renderPunchView(){
   const list=pnSelList(),st=pnStats(list);
   const actP=data.projects.filter(p=>!p.archived&&data.punch.some(x=>x.projectId===p.id)||(punchSel&&punchSel.includes(p.id)));
   const chips=`<div class="proj-bar" style="margin-bottom:14px"><span class="lbl">프로젝트</span><div class="chip projall ${punchSel===null?'on':''}" onclick="punchToggleProj(null)">전체</div>`+
-    data.projects.filter(p=>!p.archived).map(p=>{const on=punchSel&&punchSel.includes(p.id);const n=data.punch.filter(x=>x.projectId===p.id).length;return `<div class="chip projchip ${on?'on':''}" onclick="punchToggleProj('${p.id}')">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}${n?`<span style="color:var(--ink-faint);font-size:11.5px">${n}</span>`:''}</div>`;}).join('')+`</div>`;
+    data.projects.filter(p=>!p.archived&&(data.punch.some(x=>x.projectId===p.id)||(punchSel&&punchSel.includes(p.id)))).map(p=>{const on=punchSel&&punchSel.includes(p.id);const n=data.punch.filter(x=>x.projectId===p.id).length;return `<div class="chip projchip ${on?'on':''}" onclick="punchToggleProj('${p.id}')">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}${n?`<span style="color:var(--ink-faint);font-size:11.5px">${n}</span>`:''}</div>`;}).join('')+(lead?(()=>{const rest=data.projects.filter(p=>!p.archived&&!data.punch.some(x=>x.projectId===p.id)&&!(punchSel&&punchSel.includes(p.id)));return rest.length?`<select class="pn-newp" onchange="if(this.value)punchToggleProj(this.value,true)"><option value="">+ 새 프로젝트 펀치 시작</option>${rest.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select>`:'';})():'')+`</div>`;
   const sumCards=`<div class="pn-card"><div class="k">전체 진행률</div><div class="v">${st.pct}<small>% (${st.d}/${st.t})</small></div>${pnBar(st)}</div>
     <div class="pn-card click ${punchFlt==='open'?'on':''}" onclick="punchSetFlt('open')"><div class="k">미결</div><div class="v">${st.o}<small>건</small></div></div>
     <div class="pn-card click ${punchFlt==='prog'?'on':''}" onclick="punchSetFlt('prog')"><div class="k">진행중</div><div class="v">${st.g}<small>건</small></div></div>
@@ -1730,6 +1732,12 @@ function renderPunchView(){
       ${lead?`<td><span class="pn-x" onclick="punchDel('${p.id}')" title="삭제">×</span></td>`:''}</tr>`;}).join('')+`</tbody></table></div>`
     :`<div class="pn-empty">${list.length?'조건에 맞는 항목이 없어요.':'등록된 펀치 항목이 없어요.'+(lead?' 위 입력칸이나 엑셀 붙여넣기로 추가해봐요.':'')}</div>`;
   const fltBtns=`<div class="pn-flt">${[['all','전체'],['open','미결'],['prog','진행중'],['done','완료'],['over','기한 초과']].map(([k,l])=>`<button class="pn-btn ${punchFlt===k?'pri':''}" onclick="punchSetFlt('${k}')">${l}</button>`).join('')}</div>`;
+  if(punchSel===null){
+    const rows=data.projects.map(p=>({p,st:pnStats(pnList(p.id))})).filter(x=>x.st.t>0).sort((a,b)=>a.st.pct-b.st.pct);
+    mp.innerHTML=`<div class="pn-wrap">${chips}<div class="pn-top"><h2>펀치리스트 현황</h2><span class="pn-dc">전체 ${st.pct}% · ${st.d}/${st.t}</span></div>`+
+      (rows.length?`<table class="pn-pjt"><thead><tr><th>프로젝트</th><th style="width:70px">개수</th><th style="width:46%">진행률</th></tr></thead><tbody>`+rows.map(({p,st})=>`<tr class="click" onclick="punchToggleProj('${p.id}',true)"><td><span class="pn-dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}</td><td style="font-family:var(--mono)">${st.t}건</td><td><div style="display:flex;align-items:center;gap:10px"><div style="flex:1">${pnBar(st)}</div><b style="font-family:var(--mono);width:84px;text-align:right">${st.pct}% <span style="color:var(--ink-faint);font-weight:500">${st.d}/${st.t}</span></b></div></td></tr>`).join('')+`</tbody></table>`:`<div class="pn-empty">작성된 펀치리스트가 없어요.${lead?' 위에서 프로젝트를 골라 시작해봐요.':''}</div>`)+`</div>`;
+    return;
+  }
   mp.innerHTML=`<div class="pn-wrap">${chips}<div class="pn-top"><h2>펀치리스트 현황</h2>
     ${lead?`<button class="pn-btn" onclick="punchPaste()">엑셀에서 붙여넣기</button>`:''}<button class="pn-btn" onclick="punchCsv()">CSV 내보내기</button></div>
     <div class="pn-sum">${sumCards}</div>${byProj}${fltBtns}${addRow}${body}</div>`;
