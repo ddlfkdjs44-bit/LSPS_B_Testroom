@@ -134,6 +134,20 @@
   /* ── layout ── */
   .layout{display:grid;grid-template-columns:1fr 348px;gap:18px;align-items:start;}
   .layout.kanban-mode{grid-template-columns:1fr;}
+  /* 펀치 미결 대시보드 (우측 패널) */
+  .pn-dash{padding:14px 16px 12px;border-bottom:1px solid var(--line-soft);}
+  .pn-dh{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:14px;} .pn-dh b{flex:1;letter-spacing:-.01em;}
+  .pn-dc{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:10px;white-space:nowrap;}
+  .pn-dc.bad{color:var(--hi);background:var(--hi-bg);} .pn-dc.ok{color:#2f9e6e;background:rgba(47,158,110,.15);}
+  .pn-dp{border:1px solid var(--line);border-radius:10px;margin-bottom:6px;background:var(--cell-bg);overflow:hidden;}
+  .pn-dr{display:flex;align-items:center;gap:6px;padding:8px 10px;cursor:pointer;font-size:13px;} .pn-dr:hover{background:var(--accent-tint);}
+  .pn-dr .nm{flex:1;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;} .pn-dr .car{color:var(--ink-faint);font-size:11px;}
+  .pn-dbar{padding:0 10px 8px;display:flex;align-items:center;gap:8px;} .pn-dbar .pn-bar{flex:1;margin-top:0;height:6px;} .pn-dbar span{font-size:11px;color:var(--ink-faint);font-family:var(--mono);white-space:nowrap;}
+  .pn-di{border-top:1px solid var(--line-soft);padding:6px 10px 8px;max-height:260px;overflow-y:auto;}
+  .pn-dit{display:flex;align-items:center;gap:6px;font-size:12.5px;padding:4px 0;} .pn-dit .t{flex:1;min-width:0;}
+  .pn-dit .m{font-size:11px;color:var(--ink-faint);white-space:nowrap;} .pn-dit .s{font-size:10.5px;font-weight:700;border-radius:8px;padding:1px 6px;white-space:nowrap;}
+  .pn-dit .s.open{background:var(--hi-bg);color:var(--hi);} .pn-dit .s.prog{background:var(--mid-bg);color:var(--mid);}
+  .pn-go{font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;padding-top:6px;} .pn-go:hover{text-decoration:underline;}
   /* 펀치리스트 */
   .pn-wrap{padding:16px 18px 22px;}
   .pn-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
@@ -2703,12 +2717,26 @@ function renderTodos(){
       <div class="body"><div class="txt">${esc(t.text)}</div><div class="meta"><span class="pill ${p.cls}">${p.lbl}</span>${stHtml}${ddHtml}
       <span class="src" onclick="openEvent('${t.evId}')"><span class="dot" style="background:${projColor(t.projectId)}"></span>${esc(t.evTitle)}</span></div></div></div>`;}).join('');}
   const fbtn=(id,lbl)=>`<button class="${filter===id?'on':''}" onclick="setFilter('${id}')">${lbl}</button>`;
-  document.getElementById('todo-panel').innerHTML=`
+  document.getElementById('todo-panel').innerHTML=pnDashHtml()+`
     <div class="tp-head"><div class="tp-top"><h2>할일 <span class="cnt">미완료 ${openCnt}</span></h2>
       <div class="seg-sm"><button class="${todoSort==='priority'?'on':''}" onclick="setSort('priority')">우선순위</button><button class="${todoSort==='due'?'on':''}" onclick="setSort('due')">마감순</button></div></div>
       <div class="filters">${fbtn('all','전체')}${fbtn('open','진행중')}${fbtn('high','높음')}${fbtn('mid','중간')}${fbtn('low','낮음')}</div></div>
     <div class="tp-list">${list}</div>`;
 }
+/* 우측 패널: 펀치 미결 대시보드 */
+let pnDashOpen=new Set();
+function pnDashHtml(){
+  const rows=data.projects.filter(p=>projSel===null||projSel.includes(p.id)).map(p=>{const l=data.punch.filter(x=>x.projectId===p.id);const st=pnStats(l);return{p,st,open:l.filter(x=>x.status!=='done')};}).filter(r=>r.open.length>0)
+    .sort((a,b)=>b.st.over-a.st.over||b.open.length-a.open.length);
+  const tot=rows.reduce((a,r)=>a+r.open.length,0),over=rows.reduce((a,r)=>a+r.st.over,0);
+  if(!rows.length)return `<div class="pn-dash"><div class="pn-dh"><b>펀치 미결 현황</b><span class="pn-dc ok">미결 없음 ✓</span></div></div>`;
+  return `<div class="pn-dash"><div class="pn-dh"><b>펀치 미결 현황</b><span class="pn-dc">미결 ${tot}건</span>${over?`<span class="pn-dc bad">초과 ${over}</span>`:''}</div>`+rows.map(({p,st,open})=>{
+    const isO=pnDashOpen.has(p.id);
+    const items=isO?`<div class="pn-di">${open.sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999')).map(x=>{const od=x.due&&x.due<TODAY_STR;return `<div class="pn-dit"><span class="s ${x.status}">${PN_ST[x.status]}</span><span class="t">${esc(x.item)}</span><span class="m ${od?'pn-over':''}">${esc(x.owner||'')}${x.due?' · '+x.due.slice(5).replace('-','/'):''}</span></div>`;}).join('')}<div class="pn-go" onclick="punchSel=['${p.id}'];setView('punch')">펀치리스트 탭에서 보기 →</div></div>`:'';
+    return `<div class="pn-dp"><div class="pn-dr" onclick="pnDashToggle('${p.id}')"><span class="pn-dot" style="background:${projColor(p.id)}"></span><span class="nm">${esc(p.name)}</span>${st.over?`<span class="pn-dc bad">초과 ${st.over}</span>`:''}<span class="pn-dc">미결 ${open.length}</span><span class="car">${isO?'▾':'▸'}</span></div>
+      <div class="pn-dbar">${pnBar(st)}<span>${st.pct}% · ${st.d}/${st.t}</span></div>${items}</div>`;}).join('')+`</div>`;
+}
+function pnDashToggle(id){if(pnDashOpen.has(id))pnDashOpen.delete(id);else pnDashOpen.add(id);renderTodos();}
 function setFilter(f){filter=f;renderTodos();}
 function setSort(s){todoSort=s;renderTodos();}
 
