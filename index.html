@@ -157,6 +157,9 @@
   .pn-add{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
   .pn-add input[name=item]{flex:2;min-width:200px;} .pn-add input{min-width:90px;flex:1;}
   .pn-tbl{width:100%;border-collapse:collapse;font-size:13px;}
+  .pn-tbl tbody tr:hover td{background:rgba(var(--accent-rgb),.13);}
+  .pn-tbl tbody tr:hover td:first-child{font-weight:800;color:var(--accent-deep);box-shadow:inset 3px 0 0 var(--accent);}
+  .pn-tbl tbody tr:hover input{border-color:var(--line);background:var(--paper);}
   .pn-tbl td{padding:5px 6px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
   .pn-tbl input{width:100%;box-sizing:border-box;border-color:transparent;background:transparent;} .pn-tbl input:hover,.pn-tbl input:focus{border-color:var(--line);background:var(--paper);}
   .pn-st{border:0;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;}
@@ -1669,34 +1672,38 @@ function passProj(e){if(hideLeave&&isLeaveEv(e))return false;if(projSel===null)r
 
 /* ── 펀치리스트 현황·진행률 ── */
 const PN_ST={open:'미결',prog:'진행중',done:'완료'};
-let punchProj='__all', punchFlt='all';
+let punchSel=null, punchFlt='all'; // punchSel: null=전체, 아니면 프로젝트 id 배열
 function pnList(pid){return data.punch.filter(p=>pid==='__all'||(p.projectId||'')===pid);}
+function pnSelList(){return data.punch.filter(p=>punchSel===null||punchSel.includes(p.projectId||''));}
 function pnStats(list){const t=list.length,d=list.filter(p=>p.status==='done').length,g=list.filter(p=>p.status==='prog').length,o=t-d-g;
   const over=list.filter(p=>p.status!=='done'&&p.due&&p.due<TODAY_STR).length;return{t,d,g,o,over,pct:t?Math.round(d/t*100):0};}
 function pnBar(st){return `<div class="pn-bar"><i class="d" style="width:${st.t?st.d/st.t*100:0}%"></i><i class="p" style="width:${st.t?st.g/st.t*100:0}%"></i></div>`;}
 function renderPunchView(){
   const mp=document.getElementById('main-panel');
   const lead=isLeader();
-  if(punchProj!=='__all'&&!data.projects.some(p=>p.id===punchProj))punchProj='__all';
-  const list=pnList(punchProj),st=pnStats(list);
-  const opts=`<option value="__all">전체 프로젝트</option>`+data.projects.map(p=>`<option value="${p.id}" ${punchProj===p.id?'selected':''}>${esc(p.name)}</option>`).join('');
+  if(punchSel){punchSel=punchSel.filter(id=>data.projects.some(p=>p.id===id));if(!punchSel.length)punchSel=null;}
+  const list=pnSelList(),st=pnStats(list);
+  const actP=data.projects.filter(p=>!p.archived&&data.punch.some(x=>x.projectId===p.id)||(punchSel&&punchSel.includes(p.id)));
+  const chips=`<div class="proj-bar" style="margin-bottom:14px"><span class="lbl">프로젝트</span><div class="chip projall ${punchSel===null?'on':''}" onclick="punchToggleProj(null)">전체</div>`+
+    data.projects.filter(p=>!p.archived).map(p=>{const on=punchSel&&punchSel.includes(p.id);const n=data.punch.filter(x=>x.projectId===p.id).length;return `<div class="chip projchip ${on?'on':''}" onclick="punchToggleProj('${p.id}')">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}${n?`<span style="color:var(--ink-faint);font-size:11.5px">${n}</span>`:''}</div>`;}).join('')+`</div>`;
   const sumCards=`<div class="pn-card"><div class="k">전체 진행률</div><div class="v">${st.pct}<small>% (${st.d}/${st.t})</small></div>${pnBar(st)}</div>
     <div class="pn-card click ${punchFlt==='open'?'on':''}" onclick="punchSetFlt('open')"><div class="k">미결</div><div class="v">${st.o}<small>건</small></div></div>
     <div class="pn-card click ${punchFlt==='prog'?'on':''}" onclick="punchSetFlt('prog')"><div class="k">진행중</div><div class="v">${st.g}<small>건</small></div></div>
     <div class="pn-card click ${punchFlt==='done'?'on':''}" onclick="punchSetFlt('done')"><div class="k">완료</div><div class="v">${st.d}<small>건</small></div></div>
     <div class="pn-card click ${punchFlt==='over'?'on':''}" onclick="punchSetFlt('over')"><div class="k">기한 초과</div><div class="v" style="${st.over?'color:var(--hi)':''}">${st.over}<small>건</small></div></div>`;
   let byProj='';
-  if(punchProj==='__all'){
-    const rows=data.projects.map(p=>({p,st:pnStats(pnList(p.id))})).filter(x=>x.st.t>0);
-    const un=pnList('');const unSt=pnStats(un);
-    byProj=rows.length||unSt.t?`<table class="pn-pjt"><thead><tr><th>프로젝트</th><th style="width:34%">진행률</th><th>완료/전체</th><th>미결</th><th>진행중</th><th>초과</th></tr></thead><tbody>`+
-      rows.map(({p,st})=>`<tr class="click" onclick="punchSetProj('${p.id}')"><td><span class="pn-dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}</td><td><b style="font-family:var(--mono)">${st.pct}%</b>${pnBar(st)}</td><td style="font-family:var(--mono)">${st.d}/${st.t}</td><td>${st.o}</td><td>${st.g}</td><td class="${st.over?'pn-over':''}">${st.over}</td></tr>`).join('')+`</tbody></table>`:'';
+  if(punchSel===null||punchSel.length>1){
+    const rows=data.projects.filter(p=>punchSel===null||punchSel.includes(p.id)).map(p=>({p,st:pnStats(pnList(p.id))})).filter(x=>x.st.t>0);
+    byProj=rows.length?`<table class="pn-pjt"><thead><tr><th>프로젝트</th><th style="width:34%">진행률</th><th>완료/전체</th><th>미결</th><th>진행중</th><th>초과</th></tr></thead><tbody>`+
+      rows.map(({p,st})=>`<tr class="click" onclick="punchToggleProj('${p.id}',true)"><td><span class="pn-dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}</td><td><b style="font-family:var(--mono)">${st.pct}%</b>${pnBar(st)}</td><td style="font-family:var(--mono)">${st.d}/${st.t}</td><td>${st.o}</td><td>${st.g}</td><td class="${st.over?'pn-over':''}">${st.over}</td></tr>`).join('')+`</tbody></table>`:'';
   }
   const flt=l=>punchFlt==='all'?l:punchFlt==='over'?l.filter(p=>p.status!=='done'&&p.due&&p.due<TODAY_STR):l.filter(p=>p.status===punchFlt);
   const shown=flt(list).sort((a,b)=>(a.status==='done')-(b.status==='done')||(a.due||'9999').localeCompare(b.due||'9999'));
   const cats=[...new Set(data.punch.map(p=>p.category).filter(Boolean))];
-  const addRow=lead?`<div class="pn-add"><input name="item" id="pn-item" placeholder="펀치 내용 (Enter로 추가)" onkeydown="if(event.key==='Enter')punchAdd()"><input id="pn-cat" list="pn-cats" placeholder="구분 (설계/제작/시험/문서…)"><datalist id="pn-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist><input id="pn-owner" placeholder="담당"><input id="pn-due" type="date"><button class="pn-btn pri" onclick="punchAdd()">추가</button></div>`:'';
-  const proj1=punchProj!=='__all';
+  const one=punchSel&&punchSel.length===1?punchSel[0]:null;
+  const kd="onkeydown=\"if(event.key==='Enter'){event.preventDefault();punchAdd();}\"";
+  const addRow=lead?`<div class="pn-add">${one?'':`<select id="pn-proj">${data.projects.filter(p=>!p.archived&&(punchSel===null||punchSel.includes(p.id))).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('')}</select>`}<input name="item" id="pn-item" placeholder="펀치 내용 (어느 칸에서든 Enter로 추가)" ${kd}><input id="pn-cat" list="pn-cats" placeholder="구분 (설계/제작/시험/문서…)" ${kd}><datalist id="pn-cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist><input id="pn-owner" placeholder="담당" ${kd}><input id="pn-due" type="date" min="2000-01-01" max="2099-12-31" ${kd}><button class="pn-btn pri" onclick="punchAdd()">추가</button></div>`:'';
+  const proj1=!!one;
   const body=shown.length?`<div class="pn-scroll"><table class="pn-tbl"><thead><tr><th style="width:38px">No</th>${proj1?'':'<th style="width:120px">프로젝트</th>'}<th>내용</th><th style="width:100px">구분</th><th style="width:90px">담당</th><th style="width:130px">기한</th><th style="width:84px">상태</th>${lead?'<th style="width:28px"></th>':''}</tr></thead><tbody>`+shown.map((p,i)=>{
     const od=p.status!=='done'&&p.due&&p.due<TODAY_STR;
     const ro=lead?'':'readonly';
@@ -1704,24 +1711,29 @@ function renderPunchView(){
       <td><input ${ro} value="${esc(p.item)}" onchange="punchSet('${p.id}','item',this.value)"></td>
       <td><input ${ro} value="${esc(p.category||'')}" list="pn-cats" onchange="punchSet('${p.id}','category',this.value)"></td>
       <td><input ${ro} value="${esc(p.owner||'')}" onchange="punchSet('${p.id}','owner',this.value)"></td>
-      <td><input ${ro} type="date" value="${p.due||''}" class="${od?'pn-over':''}" onchange="punchSet('${p.id}','due',this.value)"></td>
+      <td><input ${ro} type="date" min="2000-01-01" max="2099-12-31" value="${p.due||''}" class="${od?'pn-over':''}" onchange="punchSet('${p.id}','due',this.value)"></td>
       <td><button class="pn-st ${p.status}" ${lead?`onclick="punchCycle('${p.id}')" title="눌러서 상태 변경"`:'disabled'}>${PN_ST[p.status]}</button></td>
       ${lead?`<td><span class="pn-x" onclick="punchDel('${p.id}')" title="삭제">×</span></td>`:''}</tr>`;}).join('')+`</tbody></table></div>`
     :`<div class="pn-empty">${list.length?'조건에 맞는 항목이 없어요.':'등록된 펀치 항목이 없어요.'+(lead?' 위 입력칸이나 엑셀 붙여넣기로 추가해봐요.':'')}</div>`;
   const fltBtns=`<div class="pn-flt">${[['all','전체'],['open','미결'],['prog','진행중'],['done','완료'],['over','기한 초과']].map(([k,l])=>`<button class="pn-btn ${punchFlt===k?'pri':''}" onclick="punchSetFlt('${k}')">${l}</button>`).join('')}</div>`;
-  mp.innerHTML=`<div class="pn-wrap"><div class="pn-top"><h2>펀치리스트 현황</h2><select onchange="punchSetProj(this.value)">${opts}</select>
+  mp.innerHTML=`<div class="pn-wrap">${chips}<div class="pn-top"><h2>펀치리스트 현황</h2>
     ${lead?`<button class="pn-btn" onclick="punchPaste()">엑셀에서 붙여넣기</button>`:''}<button class="pn-btn" onclick="punchCsv()">CSV 내보내기</button></div>
     <div class="pn-sum">${sumCards}</div>${byProj}${fltBtns}${addRow}${body}</div>`;
 }
-function punchSetProj(id){punchProj=id;renderPunchView();}
+function punchToggleProj(id,only){
+  if(id===null){punchSel=null;}
+  else if(only){punchSel=[id];}
+  else{let sel=punchSel===null?[]:punchSel.slice();const i=sel.indexOf(id);if(i>=0)sel.splice(i,1);else sel.push(id);punchSel=(!sel.length||sel.length===data.projects.filter(p=>!p.archived).length)?null:sel;}
+  renderPunchView();
+}
 function punchSetFlt(f){punchFlt=punchFlt===f?'all':f;renderPunchView();}
 function punchNextNo(){return data.punch.length+1;}
 async function punchAdd(){
   if(!isLeader())return;
   const item=document.getElementById('pn-item').value.trim();if(!item){document.getElementById('pn-item').focus();return;}
-  if(punchProj==='__all'&&!data.projects.length)return;
-  const pid=punchProj==='__all'?(data.projects[0]||{}).id||'':punchProj;
-  if(punchProj==='__all'&&data.projects.length>1&&!confirm(`프로젝트를 고르지 않아서 '${projName(pid)}'에 추가할게요. 괜찮아요? (취소하고 위에서 프로젝트를 선택해도 돼요)`))return;
+  const sel=document.getElementById('pn-proj');
+  const pid=sel?sel.value:(punchSel&&punchSel.length===1?punchSel[0]:'');
+  if(!pid){alert('추가할 프로젝트를 먼저 선택해줘요.');return;}
   data.punch.push({id:uid(),projectId:pid,item,category:document.getElementById('pn-cat').value.trim(),owner:document.getElementById('pn-owner').value.trim(),due:document.getElementById('pn-due').value,status:'open',created:TODAY_STR});
   await save();renderPunchView();setTimeout(()=>{const e=document.getElementById('pn-item');e&&e.focus();},30);
 }
@@ -1729,20 +1741,21 @@ async function punchSet(id,f,v){const p=data.punch.find(x=>x.id===id);if(!p||!is
 async function punchCycle(id){const p=data.punch.find(x=>x.id===id);if(!p||!isLeader())return;p.status={open:'prog',prog:'done',done:'open'}[p.status]||'open';p.doneDate=p.status==='done'?TODAY_STR:'';await save();renderPunchView();}
 async function punchDel(id){const p=data.punch.find(x=>x.id===id);if(!p||!isLeader())return;if(!confirm(`'${p.item}' 항목을 삭제할까요?`))return;data.punch=data.punch.filter(x=>x.id!==id);await save();renderPunchView();}
 async function punchPaste(){
-  if(punchProj==='__all'){alert('먼저 위에서 프로젝트를 선택해줘요.');return;}
+  const tgt=punchSel&&punchSel.length===1?punchSel[0]:null;
+  if(!tgt){alert('위 프로젝트 칩에서 프로젝트 하나만 선택한 뒤 붙여넣어줘요.');return;}
   const t=prompt('엑셀에서 복사한 행을 붙여넣어요.\n열 순서: 내용 / 구분 / 담당 / 기한(YYYY-MM-DD) / 상태(미결·진행중·완료)\n(내용만 있어도 돼요)');
   if(!t)return;
   const inv={'미결':'open','진행중':'prog','진행':'prog','완료':'done'};let n=0;
   t.split(/\r?\n/).forEach(line=>{const c=line.split('\t').map(x=>x.trim());if(!c[0])return;
     const due=/^\d{4}-\d{2}-\d{2}$/.test(c[3]||'')?c[3]:'';
-    data.punch.push({id:uid(),projectId:punchProj,item:c[0],category:c[1]||'',owner:c[2]||'',due,status:inv[c[4]]||'open',created:TODAY_STR});n++;});
+    data.punch.push({id:uid(),projectId:tgt,item:c[0],category:c[1]||'',owner:c[2]||'',due,status:inv[c[4]]||'open',created:TODAY_STR});n++;});
   if(n){await save();renderPunchView();}
 }
 function punchCsv(){
   const rows=[['프로젝트','No','내용','구분','담당','기한','상태','완료일']];
-  pnList(punchProj).forEach((p,i)=>rows.push([projName(p.projectId),i+1,p.item,p.category||'',p.owner||'',p.due||'',PN_ST[p.status],p.doneDate||'']));
+  pnSelList().forEach((p,i)=>rows.push([projName(p.projectId),i+1,p.item,p.category||'',p.owner||'',p.due||'',PN_ST[p.status],p.doneDate||'']));
   const csv='﻿'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\r\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`펀치리스트_${punchProj==='__all'?'전체':projName(punchProj)}_${TODAY_STR}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=`펀치리스트_${punchSel===null?'전체':punchSel.map(projName).join('+')}_${TODAY_STR}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 
 function setView(v){
