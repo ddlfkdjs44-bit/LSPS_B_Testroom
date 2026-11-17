@@ -98,6 +98,9 @@
   .chip:hover .edit{opacity:.55;width:13px;}
   .chip.add{border-style:dashed;color:var(--ink-soft);background:transparent;box-shadow:none;}
   .chip.projchip.archived{opacity:.55;border-style:dashed;}
+  .chip.projchip.hid{opacity:.45;text-decoration:line-through;border-style:dashed;}
+  .proj-bar .hidmode.on{background:#fdecea;border-color:#e0483f;color:#b3261e;}
+  .proj-bar .hidmode.armed .projchip{cursor:crosshair;}
   .chip.toggle-archived{border-style:dashed;color:var(--ink-soft);background:transparent;box-shadow:none;font-size:12px;}
   .chip.add:hover{color:var(--accent);}
   .io-btns{display:flex;gap:7px;}
@@ -1683,7 +1686,13 @@ function toggleHideLeave(){hideLeave=!hideLeave;try{localStorage.setItem('lsps_h
 const EV_KINDS=[{re:/FAT/i,lbl:'FAT',bg:'#ff7a59',fg:'#fff'},{re:/자체/,lbl:'자체',bg:'#ffd54a',fg:'#333'},{re:/SAT/i,lbl:'SAT',bg:'#2fb6a3',fg:'#fff'}];
 function evKind(e){const t=e.title||'';return EV_KINDS.find(k=>k.re.test(t))||null;}
 function kbadgeHtml(e){const k=evKind(e);return k?`<span class="kbadge" style="background:${k.bg};color:${k.fg}">${k.lbl}</span>`:'';}
-function passProj(e){if(hideLeave&&isLeaveEv(e))return false;if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
+let hiddenProj=[];try{hiddenProj=JSON.parse(localStorage.getItem('lsps_hidden_proj')||'[]');if(!Array.isArray(hiddenProj))hiddenProj=[];}catch(_){hiddenProj=[];}
+let hideMode=false;
+function saveHidden(){try{localStorage.setItem('lsps_hidden_proj',JSON.stringify(hiddenProj));}catch(_){}}
+function toggleHideMode(){hideMode=!hideMode;renderProjectBar();}
+function clearHidden(){hiddenProj=[];saveHidden();renderAll();}
+function toggleHidden(id){const i=hiddenProj.indexOf(id);if(i>=0)hiddenProj.splice(i,1);else hiddenProj.push(id);saveHidden();renderAll();}
+function passProj(e){if(hideLeave&&isLeaveEv(e))return false;if(hiddenProj.length&&hiddenProj.includes(e.projectId||'__none'))return false;if(projSel===null)return true;return projSel.includes(e.projectId||'__none');}
 
 
 /* ── 펀치리스트 현황·진행률 ── */
@@ -1820,13 +1829,15 @@ function renderProjectBar(){
   const allOn=projSel===null;
   const activeP=data.projects.filter(p=>!p.archived);
   const archivedP=data.projects.filter(p=>p.archived);
-  const chipHtml=p=>{const on=projSel!==null&&projSel.includes(p.id);return `<div class="chip projchip ${on?'on':''} ${p.archived?'archived':''}" onclick="toggleProj('${p.id}')">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}<span class="edit" onclick="event.stopPropagation();openProjEditor('${p.id}')" title="이름·색상 편집">✎</span></div>`;};
+  const chipHtml=p=>{const hid=hiddenProj.includes(p.id);const on=!hid&&projSel!==null&&projSel.includes(p.id);return `<div class="chip projchip ${on?'on':''} ${p.archived?'archived':''} ${hid?'hid':''}" onclick="${hideMode?`toggleHidden('${p.id}')`:`toggleProj('${p.id}')`}" title="${hid?'숨김 중':''}">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:${projColor(p.id)}"></span>${esc(p.name)}<span class="edit" onclick="event.stopPropagation();openProjEditor('${p.id}')" title="이름·색상 편집">✎</span></div>`;};
   let c=`<span class="lbl">프로젝트</span><div class="chip projall ${allOn?'on':''}" onclick="setAllProj()">전체</div>`;
   activeP.forEach(p=>{c+=chipHtml(p);});
   if(showArchivedProj)archivedP.forEach(p=>{c+=chipHtml(p);});
   if(data.events.some(e=>!e.projectId)){const on=projSel!==null&&projSel.includes('__none');c+=`<div class="chip projchip ${on?'on':''}" onclick="toggleProj('__none')">${on?'<span class="pcheck">✓</span>':''}<span class="dot" style="background:#999"></span>프로젝트 없음</div>`;}
   c+=`<div class="chip add" onclick="addProject()">+ 추가</div>`;
   if(archivedP.length)c+=`<div class="chip toggle-archived" onclick="toggleShowArchivedProj()">${showArchivedProj?'보관 숨기기':'보관됨 '+archivedP.length}</div>`;
+  c+=`<div class="chip hidmode ${hideMode?'on':''}" onclick="toggleHideMode()" title="켜고 프로젝트를 누르면 달력에서 숨겨요">${hideMode?'숨길 프로젝트 클릭 ▸ 완료':'프로젝트 숨기기'}</div>`;
+  if(hiddenProj.length)c+=`<div class="chip" onclick="clearHidden()" title="숨긴 프로젝트 모두 다시 표시">숨김 ${hiddenProj.length}개 해제</div>`;
   c+=`<div class="chip lvchip ${hideLeave?'on':''}" onclick="toggleHideLeave()" title="휴가 일정을 숨기고 봅니다">${hideLeave?'<span class="pcheck">✓</span>':''}휴가 제외</div>`;
   document.getElementById('proj-bar').innerHTML=c;
 }
