@@ -1,5 +1,14 @@
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<link rel="icon" href="icon-192.png">
+<!-- 아이폰용 -->
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="일정 B동">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <!-- 업무 일정 관리 v6: 프로젝트 색상 직접 지정(프리셋 + 커스텀) · 테마(라이트/다크 + 강조색) · 파일/로컬 저장 · 데이터 분리 · 도움말/업데이트 이력 -->
 <meta name="color-scheme" content="light dark">
 <style>
@@ -977,6 +986,8 @@
   .rotate-gate p{font-size:15px;font-weight:600;color:var(--ink);margin:0;}
   .rotate-gate span{font-size:12.5px;color:var(--ink-faint);}
   @keyframes rotateHint{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+  /* PWA(viewport-fit=cover): 아이폰 가로모드 노치/홈바 영역 침범 방지 */
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);padding-bottom:env(safe-area-inset-bottom);}
   @media (orientation:portrait) and (pointer:coarse){
     #app,#photo-lightbox{display:none !important;}
     .rotate-gate{display:flex;}
@@ -3842,3 +3853,10 @@ function wrExportExcel(){
 
 (function(){loadTheme();applyTheme();initAuth();})();
 </script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
