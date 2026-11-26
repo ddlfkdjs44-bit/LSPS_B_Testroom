@@ -2738,7 +2738,7 @@ function buildCalCanvas(){
   });
   return cv;
 }
-function calImgName(){const mo=document.querySelector('.cal-title .mo'),yr=document.querySelector('.cal-title .yr');return `캘린더_${(yr?yr.textContent:'').trim()}_${(mo?mo.textContent:'').trim()}.png`.replace(/\s+/g,'');}
+function calImgName(){const y=view.getFullYear(),m=String(view.getMonth()+1).padStart(2,'0');return `시험일정_${y}_${m}_B동.png`;}
 function viewOrSaveCalImage(){
   if(isMobileCal()){
     if(viewMode!=='calendar'){alert('캘린더 화면에서 눌러주세요.');return;}
